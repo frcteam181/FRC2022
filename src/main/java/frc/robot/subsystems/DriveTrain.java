@@ -185,8 +185,8 @@ public class DriveTrain extends SubsystemBase{
         }
     }
 
-    public void teleopDrive(double speedValue, double rotationValue) {
-        m_diffDrive.arcadeDrive(deadband(speedValue), deadband(rotationValue));
+    public void teleopDrive(double speedValue, double rotationValue, boolean isSquared) {
+        m_diffDrive.arcadeDrive(deadband(speedValue), deadband(rotationValue), isSquared);
     }
 
     public void motionMagicStartConfigDrive(boolean isForward, double lengthInTicks) {
