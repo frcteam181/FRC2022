@@ -351,5 +351,9 @@ public class DriveTrain extends SubsystemBase{
         m_rightLeader.configOpenloopRamp(m_secondsFromNeutral);
         m_rightFollower.configOpenloopRamp(m_secondsFromNeutral);
     }
+
+    public void feedWatchdog() {
+        m_diffDrive.feed();
+    }
     
 }

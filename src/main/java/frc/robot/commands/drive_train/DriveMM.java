@@ -28,6 +28,15 @@ public class DriveMM extends CommandBase {
 
     @Override
     public void initialize() {
+
+        m_driveTrain.motionMagicStartConfigDrive(m_targetPosition >= 0, m_targetPosition);
+
+    }
+
+    @Override
+    public void execute() {
+
+        m_driveTrain.feedWatchdog();
         
         if (m_driveTrain.motionMagicDrive(m_targetPosition)) {
             m_count++;

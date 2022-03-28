@@ -39,7 +39,7 @@ public final class Constants {
 
     // Drive Train gains and max speed
     public static final double kDriveAbsMax = 0.7;
-    public static final Gains kDriveGains = new Gains(0.004, 0, 0, 0, 0, 0);
+    public static final Gains kDriveGains = new Gains(0.002, 0, 0, 0.35, 0, 0);
     public static final Gains kTurnGains = new Gains(0.004, 0, 0, 0, 0, 0);
     public static final Gains kVelGains = new Gains(0, 0, 0, 0, 0, 0);
     public static final Gains kMotProfGains = new Gains(0, 0, 0, 0, 0, 0);
