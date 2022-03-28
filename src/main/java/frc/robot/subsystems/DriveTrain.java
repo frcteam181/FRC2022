@@ -13,6 +13,9 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -27,6 +30,11 @@ public class DriveTrain extends SubsystemBase{
     private AHRS m_gyro;
 
     private DifferentialDrive m_diffDrive;
+
+    // Creates a variable for Open Loop Ramp value a.k.a. Slew Rate.
+    // This is for tuning purposes. After tuned, update the kSecondsFromNeutral variable on Constants.java
+    private double m_secondsFromNeutral, m_driveAbsMax;
+    NetworkTableEntry m_secondsFromNeutralEntry, m_driveAbsMaxEntry;
 
     //Motion Magic set points
     private double m_leftSetpoint, m_rightSetpoint;
@@ -160,6 +168,16 @@ public class DriveTrain extends SubsystemBase{
 
         m_diffDrive = new DifferentialDrive(m_leftLeader, m_rightLeader);
 
+        // Tuning Params //
+
+        NetworkTable m_driveTestTable = NetworkTableInstance.getDefault().getTable("Shuffleboard").getSubTable("Drive Testing");
+
+        m_driveAbsMaxEntry = m_driveTestTable.getEntry("Drive Max");
+        m_secondsFromNeutralEntry = m_driveTestTable.getEntry("Forward Limiter");
+        m_gyro.reset();
+
+        // End of Tuning Params //
+
     }
 
     // Encoder methods
@@ -176,6 +194,21 @@ public class DriveTrain extends SubsystemBase{
         return m_leftLeader.getSelectedSensorPosition();
     }
 
+    // Gyro methods
+    public double getHeading() {
+        return Math.IEEEremainder(m_gyro.getAngle(), 360);
+    }
+
+    public double getRawAngle() {
+        return m_gyro.getAngle();
+    }
+
+    public AHRS getGyro() {
+        return m_gyro;
+    }
+
+    // 
+
     // Drive Train Methods
     private double deadband(double value) {
         if (Math.abs(value) >= kDriverDeadband) {
@@ -185,8 +218,24 @@ public class DriveTrain extends SubsystemBase{
         }
     }
 
+    private double clamp(double value) {
+        if (value >= m_driveAbsMax){
+            return m_driveAbsMax;
+        } 
+        
+        if (value <= -m_driveAbsMax) {
+            return -m_driveAbsMax;
+        }
+
+        return value;
+    }
+
     public void teleopDrive(double speedValue, double rotationValue, boolean isSquared) {
-        m_diffDrive.arcadeDrive(deadband(speedValue), deadband(rotationValue), isSquared);
+        m_diffDrive.arcadeDrive(clamp(deadband(speedValue)), deadband(rotationValue), isSquared);
+    }
+
+    public void teleopDrive(double speedValue, double rotationValue) {
+        m_diffDrive.arcadeDrive(clamp(deadband(speedValue)), deadband(rotationValue));
     }
 
     public void motionMagicStartConfigDrive(boolean isForward, double lengthInTicks) {
@@ -253,6 +302,49 @@ public class DriveTrain extends SubsystemBase{
         double m_currentRightPos = getRightEncoderPosition();
 
         return Math.abs(m_currentLetfPos - m_leftSetpoint) < m_tolerance && Math.abs(m_currentRightPos - m_rightSetpoint) < m_tolerance;
+    }
+
+    public void motionMagicEndConfigTurn(){
+		//m_leftLeader.configMotionCruiseVelocity(16636, kTimeoutMs);
+		//m_leftLeader.configMotionAcceleration(8318, kTimeoutMs);
+		//m_rightLeader.configMotionCruiseVelocity(16636, kTimeoutMs);
+		//m_rightLeader.configMotionAcceleration(8318, kTimeoutMs);
+	}
+
+    public double getLeftSetPoint() {
+        return m_leftSetpoint;
+    }
+
+    public double getRightSetPoint() {
+        return m_rightSetpoint;
+    }
+
+    public void resetDrivePIDValues(double kP, double kI, double kD, double kF) {
+
+        m_leftLeader.config_kP(kSlotDrive, kP);
+        m_leftLeader.config_kI(kSlotDrive, kI);
+        m_leftLeader.config_kD(kSlotDrive, kD);
+        m_leftLeader.config_kF(kSlotDrive, kF);
+
+    }
+
+    public void resetTurnPIDValues(double kP, double kI, double kD, double kF) {
+
+        m_leftLeader.config_kP(kSlotTurning, kP);
+        m_leftLeader.config_kI(kSlotTurning, kI);
+        m_leftLeader.config_kD(kSlotTurning, kD);
+        m_leftLeader.config_kF(kSlotTurning, kF);
+
+    }
+
+    public void updateDriveLimiters() {
+        m_driveAbsMax = m_driveAbsMaxEntry.getDouble(0);
+        m_secondsFromNeutral = m_secondsFromNeutralEntry.getDouble(0);
+
+        m_leftLeader.configOpenloopRamp(m_secondsFromNeutral);
+        m_leftFollower.configOpenloopRamp(m_secondsFromNeutral);
+        m_rightLeader.configOpenloopRamp(m_secondsFromNeutral);
+        m_rightFollower.configOpenloopRamp(m_secondsFromNeutral);
     }
     
 }
