@@ -7,14 +7,11 @@ public final class Constants {
     // Robot Characteristics
     public static final double kWheelDiameterMeters = Units.inchesToMeters(6);
     public static final double kTrackWidthMeters = Units.inchesToMeters(11);
-
-    public static final int kCountsPerRevolution = 4096; //a.k.a Sensor Units Per Rotation
     public static final int kGearRatio = 1;
     public static final int kMaxRPM = 5330;
-    public static final double kExpectedVelocity = (kMaxRPM/600) * kCountsPerRevolution;
-    public static final double kBaseSpeed = 1;
-    public static final double kBaseSpeedShoot = 0.5;
 
+    public static final int kCountsPerRevolution = 4096; //a.k.a Sensor Units Per Rotation
+    public static final double kExpectedVelocity = (kMaxRPM/600) * kCountsPerRevolution;
     /**
 	 * Using the configSelectedFeedbackCoefficient() function, scale units to 3600 per rotation.
 	 * This is nice as it keeps 0.1 degrees of resolution, and is fairly intuitive.
@@ -27,7 +24,7 @@ public final class Constants {
 	 * Drive the robot in counter clockwise rotations and measure the units per rotation.
 	 * Take the average of the two.
 	 */
-	public final static int kEncoderUnitsPerRotation = 51711; //Measure This!!!
+	public final static int kEncoderUnitsPerRotation = 51711; // Measure This!!!
     public static final double kEncoderTicksPerInch = (kCountsPerRevolution * kGearRatio) / (Math.PI * Units.metersToInches(kWheelDiameterMeters));
     public static final double kEncoderTicksPerDegree = kEncoderUnitsPerRotation / 360;
 
@@ -47,6 +44,7 @@ public final class Constants {
     public static final Gains kMotProfGains = new Gains(0, 0, 0, 0, 0, 0);
 
     // Controllers and deadbands
+    public static final int kDRIVER_CONTROLLER = 0;
     public static final double kDriverDeadband = 0.05;
 
     // Do not change anything after this line unless you rewire the robot and

@@ -13,6 +13,8 @@ import frc.robot.commands.drive_train.TurnToAngleTest;
 import frc.robot.commands.drive_train.UpdateDriveLimiters;
 import frc.robot.subsystems.DriveTrain;
 
+import static frc.robot.Constants.*;
+
 
 public class RobotContainer {
 
@@ -25,6 +27,9 @@ public class RobotContainer {
   private SendableChooser<Command> m_autoChooser;
   
   public RobotContainer() {
+
+    //Controllers and Joystick
+    m_driverController = new Joystick(kDRIVER_CONTROLLER);
 
     //Subsystems
     m_driveTrain = new DriveTrain();
