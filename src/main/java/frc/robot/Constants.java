@@ -24,14 +24,15 @@ public final class Constants {
 	 * Drive the robot in counter clockwise rotations and measure the units per rotation.
 	 * Take the average of the two.
 	 */
-	public final static int kEncoderUnitsPerRotation = 51711; // Measure This!!!
+	public final static int kEncoderUnitsPerRotation = 17598;//51711; // Measure This!!!
     public static final double kEncoderTicksPerInch = (kCountsPerRevolution * kGearRatio) / (Math.PI * Units.metersToInches(kWheelDiameterMeters));
     public static final double kEncoderTicksPerDegree = kEncoderUnitsPerRotation / 360;
 
     // TalonSRX configurations
+    public static final int k100msPerSecond = 10;
     public static final int kTimeoutMs = 30;
     public static final int kPeriodMs = 10;
-    public static final double kSecondsFromNeutral = 0.4; //Slew Rate
+    public static final double kSecondsFromNeutral = 0.5; //Slew Rate
     public static final double kNeutralDeadband = 0.001;
     public static final int kLoopTimeMs = 1;
     public static final int kAllowableCloseLoopError = 25;
@@ -39,13 +40,13 @@ public final class Constants {
     // Drive Train gains and max speed
     public static final double kDriveAbsMax = 0.7;
     public static final Gains kDriveGains = new Gains(0.004, 0, 0, 0, 0, 0);
-    public static final Gains kTurnGains = new Gains(0, 0, 0, 0, 0, 0);
+    public static final Gains kTurnGains = new Gains(0.004, 0, 0, 0, 0, 0);
     public static final Gains kVelGains = new Gains(0, 0, 0, 0, 0, 0);
     public static final Gains kMotProfGains = new Gains(0, 0, 0, 0, 0, 0);
 
     // Controllers and deadbands
     public static final int kDRIVER_CONTROLLER = 0;
-    public static final double kDriverDeadband = 0.05;
+    public static final double kDriverDeadband = 0.2;
 
     // Do not change anything after this line unless you rewire the robot and
     // update the spreadsheet!

@@ -182,8 +182,8 @@ public class DriveTrain extends SubsystemBase{
 
     // Encoder methods
     public void resetEncoders() {
-        m_leftLeader.getSensorCollection().setAnalogPosition(0, kTimeoutMs);
-        m_rightLeader.getSensorCollection().setAnalogPosition(0, kTimeoutMs);
+        m_leftLeader.getSensorCollection().setQuadraturePosition(0, kTimeoutMs);
+        m_rightLeader.getSensorCollection().setQuadraturePosition(0, kTimeoutMs);
     }
 
     public double getLeftEncoderPosition() {
@@ -231,14 +231,18 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public void teleopDrive(double speedValue, double rotationValue, boolean isSquared) {
-        m_diffDrive.arcadeDrive(clamp(deadband(speedValue)), deadband(rotationValue), isSquared);
+        m_diffDrive.arcadeDrive(deadband(speedValue), deadband(-rotationValue), isSquared);
     }
 
     public void teleopDrive(double speedValue, double rotationValue) {
-        m_diffDrive.arcadeDrive(clamp(deadband(speedValue)), deadband(rotationValue));
+        m_diffDrive.arcadeDrive(deadband(speedValue), deadband(-rotationValue));
     }
 
     public void motionMagicStartConfigDrive(boolean isForward, double lengthInTicks) {
+
+        m_leftLeader.setSafetyEnabled(false);
+        m_rightLeader.setSafetyEnabled(false);
+
         m_leftSetpoint = getLeftEncoderPosition() + lengthInTicks;
         m_rightSetpoint = getRightEncoderPosition() + lengthInTicks;
 
@@ -260,8 +264,6 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public boolean motionMagicDrive(double targetPosition) {
-        //m_leftLeader.setSafetyEnabled(false);
-        //m_rightLeader.setSafetyEnabled(false);
 
         m_leftLeader.set(ControlMode.MotionMagic, m_leftSetpoint);
         m_rightLeader.set(ControlMode.MotionMagic, m_rightSetpoint);
@@ -274,6 +276,9 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public void motionMagicStartConfigsTurn(boolean isCCWturn, double lengthInTicks){
+
+        m_leftLeader.setSafetyEnabled(false);
+        m_rightLeader.setSafetyEnabled(false);
 
 		m_leftLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
 		m_rightLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
