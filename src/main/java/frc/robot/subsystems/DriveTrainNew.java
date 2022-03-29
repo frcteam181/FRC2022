@@ -1,10 +1,22 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.kEncoderUnitsPerRotation;
+import static frc.robot.Constants.k100msPerSecond;
+import static frc.robot.Constants.kCountsPerRevolution;
+import static frc.robot.Constants.kDriveGains;
+import static frc.robot.Constants.kDriverDeadband;
 import static frc.robot.Constants.kGearRatio;
+import static frc.robot.Constants.kLEFT_FOLLOWER;
+import static frc.robot.Constants.kLEFT_LEADER;
 import static frc.robot.Constants.kNeutralDeadband;
+import static frc.robot.Constants.kPID_PRIMARY;
+import static frc.robot.Constants.kRIGHT_FOLLOWER;
+import static frc.robot.Constants.kRIGHT_LEADER;
+import static frc.robot.Constants.kSlotDrive;
+import static frc.robot.Constants.kSlotTurning;
 import static frc.robot.Constants.kTimeoutMs;
-import static frc.robot.Constants.kTurnTravelUnitsPerRotation;
+import static frc.robot.Constants.kTrackWidthMeters;
+import static frc.robot.Constants.kTurnGains;
+import static frc.robot.Constants.kWheelDiameterMeters;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -23,7 +35,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -35,8 +46,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-
-import static frc.robot.Constants.*;
 
 public class DriveTrainNew extends SubsystemBase {
 	private final double MAX_TELEOP_DRIVE_SPEED = .70;
@@ -78,7 +87,6 @@ public class DriveTrainNew extends SubsystemBase {
 
 	// Motion Magic Setpoints for each side of the motor
 	private double m_left_setpoint, m_right_setpoint;
-	private boolean m_isCCWTurn;
 
   	/** Creates a new DriveTrain. */
  	public DriveTrainNew() {
@@ -546,6 +554,7 @@ public class DriveTrainNew extends SubsystemBase {
 		angle.set(-m_drivetrainSimulator.getHeading().getDegrees());
 	}
 
+	@SuppressWarnings("unused")
 	private int distanceToNativeUnits(double positionMeters){
 		double wheelRotations = positionMeters/(2 * Math.PI * (kWheelDiameterMeters / 2));
 		double motorRotations = wheelRotations * kGearRatio;
@@ -553,6 +562,8 @@ public class DriveTrainNew extends SubsystemBase {
 		return sensorCounts;
 	}
 
+
+	@SuppressWarnings("unused")
 	private int velocityToNativeUnits(double velocityMetersPerSecond){
 		double wheelRotationsPerSecond = velocityMetersPerSecond/(2 * Math.PI * (kWheelDiameterMeters / 2));
 		double motorRotationsPerSecond = wheelRotationsPerSecond * kGearRatio;
@@ -561,6 +572,8 @@ public class DriveTrainNew extends SubsystemBase {
 		return sensorCountsPer100ms;
 	}
 
+
+	@SuppressWarnings("unused")
 	private double nativeUnitsToDistanceMeters(double sensorCounts){
 		double motorRotations = (double)sensorCounts / kCountsPerRevolution;
 		double wheelRotations = motorRotations / kGearRatio;

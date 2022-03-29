@@ -36,13 +36,17 @@ public final class Constants {
     public static final double kNeutralDeadband = 0.001;
     public static final int kLoopTimeMs = 1;
     public static final int kAllowableCloseLoopError = 25;
+    public static final double kOpenLoopRampRate = 0.3;
+    public static final int kContinuousCurrent = 20;
+    public static final int kMotionCruiseVelocity = 1500;
+    public static final int kMotionAcceleration = 750;
 
     // Drive Train gains and max speed
     public static final double kDriveAbsMax = 0.7;
-    public static final Gains kDriveGains = new Gains(0.002, 0, 0, 0.35, 0, 0);
-    public static final Gains kTurnGains = new Gains(0.004, 0, 0, 0, 0, 0);
-    public static final Gains kVelGains = new Gains(0, 0, 0, 0, 0, 0);
-    public static final Gains kMotProfGains = new Gains(0, 0, 0, 0, 0, 0);
+    public static final Gains kDriveGains = new Gains(0.0016, 0, 0, 0.35, 100, 1.0);
+    public static final Gains kTurnGains = new Gains(0.004,   0, 0, 0.35, 200, 1.0);
+    public static final Gains kVelGains = new Gains(0,        0, 0, 0.00, 300, 1.0);
+    public static final Gains kMotProfGains = new Gains(0,    0, 0, 0.35, 400, 1.0);
 
     // Controllers and deadbands
     public static final int kDRIVER_CONTROLLER = 0;

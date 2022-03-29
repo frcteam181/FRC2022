@@ -218,6 +218,8 @@ public class DriveTrain extends SubsystemBase{
         }
     }
 
+
+	@SuppressWarnings("unused")
     private double clamp(double value) {
         if (value >= m_driveAbsMax){
             return m_driveAbsMax;

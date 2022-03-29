@@ -5,13 +5,13 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.DriveTrainTalonSRX;
 
 import static frc.robot.Constants.*;
 
 public class TurnToAngleTest extends CommandBase {
 
-    DriveTrain m_driveTrain;
+    DriveTrainTalonSRX m_driveTrain;
 
     public static double m_currentAngle;
     double m_targetAngle, m_tolerance, m_speed, m_arcLengthTicks;
@@ -20,7 +20,7 @@ public class TurnToAngleTest extends CommandBase {
     private NetworkTableEntry m_turnKpEntry, m_turnKiEntry, m_turnKdEntry, m_turnKfEntry, m_arcLengthEntry, m_iterationEntry, m_driveDurationEntry, m_arcLengthTicksEntry;
     int STABLE_ITERATIONS_BEFORE_FINISHED = 5;
 
-    public TurnToAngleTest(DriveTrain driveTrain, double angle) {
+    public TurnToAngleTest(DriveTrainTalonSRX driveTrain, double angle) {
 
         m_driveTrain = driveTrain;
         m_targetAngle = angle;
