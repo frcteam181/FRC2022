@@ -1,18 +1,18 @@
 package frc.robot.commands.drive_train;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.DriveTrainTalonSRX;
 
 import static frc.robot.Constants.*;
 
 public class DriveMM extends CommandBase {
 
-    DriveTrain m_driveTrain;
+    DriveTrainTalonSRX m_driveTrain;
 
     double m_targetPosition;
     int m_count, STABLE_ITERATIONS_BEFORE_FINISHED = 5;
 
-    public DriveMM(DriveTrain driveTrain, double targetInches) {
+    public DriveMM(DriveTrainTalonSRX driveTrain, double targetInches) {
 
         m_driveTrain = driveTrain;
 
@@ -29,15 +29,13 @@ public class DriveMM extends CommandBase {
     @Override
     public void initialize() {
 
-        m_driveTrain.motionMagicStartConfigDrive(m_targetPosition >= 0, m_targetPosition);
+        m_driveTrain.motionMagicStartConfigDrive( m_targetPosition);
 
     }
 
     @Override
     public void execute() {
 
-        m_driveTrain.feedWatchdog();
-        
         if (m_driveTrain.motionMagicDrive(m_targetPosition)) {
             m_count++;
         } else {

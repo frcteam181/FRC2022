@@ -11,7 +11,7 @@ import frc.robot.commands.drive_train.DriveMMTest;
 import frc.robot.commands.drive_train.TurnToAngle;
 import frc.robot.commands.drive_train.TurnToAngleTest;
 import frc.robot.commands.drive_train.UpdateDriveLimiters;
-import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.DriveTrainTalonSRX;
 
 import static frc.robot.Constants.*;
 
@@ -19,7 +19,7 @@ import static frc.robot.Constants.*;
 public class RobotContainer {
 
   //Subsystems
-  DriveTrain m_driveTrain;
+  DriveTrainTalonSRX m_driveTrain;
 
   //OI
   Joystick m_driverController;
@@ -32,7 +32,7 @@ public class RobotContainer {
     m_driverController = new Joystick(kDRIVER_CONTROLLER);
 
     //Subsystems
-    m_driveTrain = new DriveTrain();
+    m_driveTrain = new DriveTrainTalonSRX();
 
     //Default Commands
     m_driveTrain.setDefaultCommand(new DriveTrainDefaultCommand(m_driveTrain, m_driverController));
