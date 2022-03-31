@@ -2,13 +2,13 @@ package frc.robot.commands.autonomous;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.drive_train.DriveMMTest;
-import frc.robot.subsystems.DriveTrainTalonSRX;
+import frc.robot.subsystems.DriveTrain;
 
 public class MotionMagicDriveTest extends SequentialCommandGroup {
 
-    DriveTrainTalonSRX m_driveTrain;
+    DriveTrain m_driveTrain;
 
-    public MotionMagicDriveTest(DriveTrainTalonSRX driveTrain) {
+    public MotionMagicDriveTest(DriveTrain driveTrain) {
 
         m_driveTrain = driveTrain;
 

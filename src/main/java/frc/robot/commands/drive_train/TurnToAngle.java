@@ -1,19 +1,19 @@
 package frc.robot.commands.drive_train;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.DriveTrainTalonSRX;
+import frc.robot.subsystems.DriveTrain;
 
 import static frc.robot.Constants.*;
 
 public class TurnToAngle extends CommandBase {
 
-    DriveTrainTalonSRX m_driveTrain;
+    DriveTrain m_driveTrain;
 
     double m_tolerance, m_arcLengthTicks;
     int STABLE_ITERATIONS_BEFORE_FINISHED = 5;
     double m_count = 0;
     
-    public TurnToAngle(DriveTrainTalonSRX driveTrain, double angle) {
+    public TurnToAngle(DriveTrain driveTrain, double angle) {
 
         m_driveTrain = driveTrain;
         m_arcLengthTicks = angle * kEncoderTicksPerDegree;

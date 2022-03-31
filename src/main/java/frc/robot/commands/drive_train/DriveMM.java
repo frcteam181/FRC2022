@@ -1,18 +1,18 @@
 package frc.robot.commands.drive_train;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.DriveTrainTalonSRX;
+import frc.robot.subsystems.DriveTrain;
 
 import static frc.robot.Constants.*;
 
 public class DriveMM extends CommandBase {
 
-    DriveTrainTalonSRX m_driveTrain;
+    DriveTrain m_driveTrain;
 
     double m_targetPosition;
     int m_count, STABLE_ITERATIONS_BEFORE_FINISHED = 5;
 
-    public DriveMM(DriveTrainTalonSRX driveTrain, double targetInches) {
+    public DriveMM(DriveTrain driveTrain, double targetInches) {
 
         m_driveTrain = driveTrain;
 

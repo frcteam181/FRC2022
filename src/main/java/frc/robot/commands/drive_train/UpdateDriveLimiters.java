@@ -1,13 +1,13 @@
 package frc.robot.commands.drive_train;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.subsystems.DriveTrainTalonSRX;
+import frc.robot.subsystems.DriveTrain;
 
 public class UpdateDriveLimiters  extends InstantCommand{
 
-    DriveTrainTalonSRX m_driveTrain;
+    DriveTrain m_driveTrain;
 
-    public UpdateDriveLimiters(DriveTrainTalonSRX driveTrain) {
+    public UpdateDriveLimiters(DriveTrain driveTrain) {
 
         m_driveTrain = driveTrain;
 
