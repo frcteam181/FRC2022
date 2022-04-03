@@ -16,6 +16,7 @@ public class Climber extends SubsystemBase{
     SlewRateLimiter m_rightLimiter, m_leftLimiter;
 
     public Climber() {
+        
         m_leftClimberPull = new VictorSP(kLEFT_CLIMBER_PULL);
         m_rightClimberPull = new VictorSP(kRIGHT_CLIMBER_PULL);
 

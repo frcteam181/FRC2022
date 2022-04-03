@@ -168,6 +168,22 @@ public class DriveTrain extends SubsystemBase{
         return m_leftLeader.getSelectedSensorPosition();
     }
 
+    public double getLeftEncoderVelocity() {
+        return m_leftLeader.getSelectedSensorVelocity();
+    }
+
+    public double getRightEncoderVelocity() {
+        return m_rightLeader.getSelectedSensorVelocity();
+    }
+
+    public double getLeftEncoderError() {
+        return (getLeftSetPoint() - getLeftEncoderPosition());
+    }
+
+    public double getRightEncoderError() {
+        return (getRightSetPoint() - getRightEncoderPosition());
+    }
+
     // Gyro methods
     public double getHeading() {
         return Math.IEEEremainder(m_gyro.getAngle(), 360);
@@ -189,7 +205,6 @@ public class DriveTrain extends SubsystemBase{
             return 0;
         }
     }
-
 
 	@SuppressWarnings("unused")
     private double clamp(double value) {

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.commands.autonomous.TaxiOnly;
 import frc.robot.commands.autonomous.TwoBallsLeft;
 import frc.robot.commands.climber.AutoClimbUp;
 import frc.robot.commands.climber.ExtendClimberBoth;
@@ -142,6 +143,7 @@ public class RobotContainer {
 
     buildCompetitionTab();
     buildDriverTestTab();
+    buildTestDrive();
 
   }
 
@@ -153,10 +155,11 @@ public class RobotContainer {
     m_autoChooser = new SendableChooser<Command>();
 
     // Sets Default Auto
-    //m_autoChooser.setDefaultOption("Taxi Only", new TaxiOnly(m_driveTrain));
+    m_autoChooser.setDefaultOption("Taxi Only", new TaxiOnly(m_driveTrain));
     
     // Add autos here:
     m_autoChooser.addOption("Hangar : Two Ball", new TwoBallsLeft(m_driveTrain, m_intake, m_conveyor));
+    m_autoChooser.addOption("Taxi Only", new TaxiOnly(m_driveTrain));
 
     // 
     m_competitionTab.add("Choose Auto", m_autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser).withPosition(4, 3).withSize(2, 1);
@@ -212,6 +215,48 @@ public class RobotContainer {
     m_driveMMTab.add("Turn Ki", m_driveTrain.getPIDValue("Turn", "Ki"))        .withPosition(9, 1).withSize(1, 1);
     m_driveMMTab.add("Turn Kd", m_driveTrain.getPIDValue("Turn", "Kd"))     .withPosition(9, 2).withSize(1, 1);
     m_driveMMTab.add("Turn Kf", m_driveTrain.getPIDValue("Turn", "Kf"))     .withPosition(9, 3).withSize(1, 1);
+
+  }
+
+  public void buildTestDrive() {
+
+    ShuffleboardTab m_testDriveTab = Shuffleboard.getTab("Test Drive");
+
+    // Column 0
+    m_testDriveTab.add("Drive kP", m_driveTrain.getPIDValue("Drive", "kP"))          .withPosition(0, 0).withSize(1, 1);
+    m_testDriveTab.add("Drive kI", m_driveTrain.getPIDValue("Drive", "kI"))        .withPosition(0, 1).withSize(1, 1);
+    m_testDriveTab.add("Drive kD", m_driveTrain.getPIDValue("Drive", "kD"))     .withPosition(0, 2).withSize(1, 1);
+    m_testDriveTab.add("Drive kF", m_driveTrain.getPIDValue("Drive", "kF"))     .withPosition(0, 3).withSize(1, 1);
+    
+    m_testDriveTab.add("Drive Xin", new DriveMMTest(m_driveTrain, 0))     .withPosition(14, 4).withSize(2, 1);
+    m_testDriveTab.add("Drive 100in", new DriveMM(m_driveTrain, 100))          .withPosition(14, 5).withSize(2, 1);
+    m_testDriveTab.add("Drive -100in", new DriveMM(m_driveTrain, -100))        .withPosition(14, 6).withSize(2, 1);
+
+    // Column 3
+    m_testDriveTab.addNumber("L-Setpoint", m_driveTrain::getLeftSetPoint)          .withPosition(3, 3).withSize(1, 1);
+    m_testDriveTab.addNumber("L-Error", m_driveTrain::getLeftEncoderError)          .withPosition(4, 4).withSize(1, 1);
+
+    // Column 4
+    m_testDriveTab.addNumber("L-Pos", m_driveTrain::getLeftEncoderPosition)          .withPosition(3, 3).withSize(1, 1);
+    m_testDriveTab.addNumber("L-Vel", m_driveTrain::getLeftEncoderVelocity)          .withPosition(4, 4).withSize(1, 1);
+
+    // Column 5
+
+    // Column 6
+    m_testDriveTab.add("Gyro (NavX)", m_driveTrain.getGyro()).withPosition(6, 0).withWidget(BuiltInWidgets.kGyro);
+
+    m_testDriveTab.add("Turn OL", m_driveTrain.getPIDValue("Drive", "kP"))          .withPosition(6, 6).withSize(1, 1);
+
+    // Column 13
+    m_testDriveTab.add("Turn Xdeg", new TurnToAngleTest(m_driveTrain, 0))     .withPosition(13, 4).withSize(2, 1);
+    m_testDriveTab.add("Turn 90deg", new TurnToAngle(m_driveTrain, 90))          .withPosition(13, 5).withSize(2, 1);
+    m_testDriveTab.add("Turn -90deg", new TurnToAngle(m_driveTrain, -90))        .withPosition(13, 6).withSize(2, 1);
+
+    // Column 14
+    m_testDriveTab.add("Turn kP", m_driveTrain.getPIDValue("Turn", "kP"))          .withPosition(14, 0).withSize(1, 1);
+    m_testDriveTab.add("Turn kI", m_driveTrain.getPIDValue("Turn", "kI"))        .withPosition(14, 1).withSize(1, 1);
+    m_testDriveTab.add("Turn kD", m_driveTrain.getPIDValue("Turn", "kD"))     .withPosition(14, 2).withSize(1, 1);
+    m_testDriveTab.add("Turn kF", m_driveTrain.getPIDValue("Turn", "kF"))     .withPosition(14, 3).withSize(1, 1);
 
   }
 

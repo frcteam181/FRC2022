@@ -35,7 +35,7 @@ public final class Constants {
     public static final double kNeutralDeadband = 0.001;
     public static final int kLoopTimeMs = 1;
     public static final int kAllowableCloseLoopError = 75;
-    public static final double kOpenLoopRampRate = 0.3; //Slew Rate
+    public static final double kOpenLoopRampRate = 0.5; //Slew Rate
     public static final int kContinuousCurrent = 20;
     public static final int kMotionCruiseVelocity = 1500;
     public static final int kMotionAcceleration = 750;
