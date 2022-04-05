@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
 public final class Constants {
@@ -10,23 +11,26 @@ public final class Constants {
     public static final int kGearRatio = 1;
     public static final int kMaxRPM = 5330;
 
-    public static final int kCountsPerRevolution = 4096; //a.k.a Sensor Units Per Rotation
+    public static final int kCountsPerRevolution = 4096;
     public static final double kExpectedVelocity = (kMaxRPM/600) * kCountsPerRevolution;
-    /**
-	 * Using the configSelectedFeedbackCoefficient() function, scale units to 3600 per rotation.
-	 * This is nice as it keeps 0.1 degrees of resolution, and is fairly intuitive.
-	 */
 	public final static double kTurnTravelUnitsPerRotation = 3600;
-	
-	/**
-	 * Empirically measure what the difference between encoders per 360'
-	 * Drive the robot in clockwise rotations and measure the units per rotation.
-	 * Drive the robot in counter clockwise rotations and measure the units per rotation.
-	 * Take the average of the two.
-	 */
 	public final static int kEncoderUnitsPerRotation = 51711; // 17598; Measure This!!!
     public static final double kEncoderTicksPerInch = (kCountsPerRevolution * kGearRatio) / (Math.PI * Units.metersToInches(kWheelDiameterMeters));
     public static final double kEncoderTicksPerDegree = kEncoderUnitsPerRotation / 360;
+
+    // values for your robot.
+    public static final double ksVolts = 1.069;
+    public static final double kvVoltSecondsPerMeter = 2.9807;
+    public static final double kaVoltSecondsSquaredPerMeter = 0.93873;
+    public static final double kPDriveVel = 3.1519;
+    public static final double kPDrivePos = 14.356;
+    public static final double kDDrivePos = 1717.1;
+    public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackWidthMeters);
+    public static final double kMaxSpeedMetersPerSecond = 3;
+    public static final double kMaxAccelerationMetersPerSecondSquared = 3;
+    // Reasonable baseline values for a RAMSETE follower in units of meters and seconds
+    public static final double kRamseteB = 2;
+    public static final double kRamseteZeta = 0.7;
 
     // TalonSRX configurations
     public static final int k100msPerSecond = 10;

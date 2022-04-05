@@ -1,5 +1,15 @@
 package frc.robot;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Joystick.ButtonType;
@@ -8,9 +18,10 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import frc.robot.commands.autonomous.TaxiOnly;
+//import frc.robot.commands.autonomous.TaxiOnly;
 import frc.robot.commands.autonomous.TwoBallsLeft;
 import frc.robot.commands.climber.AutoClimbUp;
 import frc.robot.commands.climber.ExtendClimberBoth;
@@ -35,6 +46,8 @@ import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Intake;
 
 import static frc.robot.Constants.*;
+
+import java.util.List;
 
 
 public class RobotContainer {
@@ -155,11 +168,11 @@ public class RobotContainer {
     m_autoChooser = new SendableChooser<Command>();
 
     // Sets Default Auto
-    m_autoChooser.setDefaultOption("Taxi Only", new TaxiOnly(m_driveTrain));
+    //m_autoChooser.setDefaultOption("Taxi Only", new TaxiOnly(m_driveTrain));
     
     // Add autos here:
     m_autoChooser.addOption("Hangar : Two Ball", new TwoBallsLeft(m_driveTrain, m_intake, m_conveyor));
-    m_autoChooser.addOption("Taxi Only", new TaxiOnly(m_driveTrain));
+    //m_autoChooser.addOption("Taxi Only", new TaxiOnly(m_driveTrain));
 
     // 
     m_competitionTab.add("Choose Auto", m_autoChooser).withWidget(BuiltInWidgets.kComboBoxChooser).withPosition(4, 3).withSize(2, 1);
@@ -261,6 +274,27 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return m_autoChooser.getSelected();
+    //return m_autoChooser.getSelected();
+
+    // Create a voltage constraint to ensure we don't accelerate too fast
+    var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(new SimpleMotorFeedforward(ksVolts, kvVoltSecondsPerMeter, kaVoltSecondsSquaredPerMeter), kDriveKinematics, 10);
+
+    // Create config for trajectory
+    TrajectoryConfig config = new TrajectoryConfig(kMaxSpeedMetersPerSecond, kMaxAccelerationMetersPerSecondSquared).setKinematics(kDriveKinematics).addConstraint(autoVoltageConstraint);
+
+    // An example trajectory to follow.  All units in meters.
+    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)), List.of(new Translation2d(1, 1), new Translation2d(2, -1)), new Pose2d(3, 0, new Rotation2d(0)), config);
+
+    RamseteCommand ramseteCommand = new RamseteCommand(exampleTrajectory, m_driveTrain::getPose, new RamseteController(kRamseteB, kRamseteZeta), new SimpleMotorFeedforward(ksVolts, kvVoltSecondsPerMeter, kaVoltSecondsSquaredPerMeter), kDriveKinematics, m_driveTrain::getWheelSpeeds, new PIDController(kPDriveVel, 0, 0),
+            new PIDController(kPDriveVel, 0, 0),
+            // RamseteCommand passes volts to the callback
+            m_driveTrain::tankDriveVolts,
+            m_driveTrain);
+
+    // Reset odometry to the starting pose of the trajectory.
+    m_driveTrain.resetOdometry(exampleTrajectory.getInitialPose());
+
+    // Run path following command, then stop at the end.
+    return ramseteCommand.andThen(() -> m_driveTrain.tankDriveVolts(0, 0));
   }
 }

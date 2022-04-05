@@ -13,6 +13,9 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -40,6 +43,9 @@ public class DriveTrain extends SubsystemBase{
     // Invert Drive
     private int m_invSpeed;
     private boolean m_isDriveInverted;
+
+    // Odometry class for tracking robot pose
+    private final DifferentialDriveOdometry m_odometry;
 
     public DriveTrain() {
 
@@ -88,10 +94,10 @@ public class DriveTrain extends SubsystemBase{
         m_rightLeader.configAllSettings(config);
 
         // Set the followers and inverts
-        m_leftLeader.setInverted(true);
-        m_leftLeader.setSensorPhase(true);
-        m_rightLeader.setInverted(false);
-        m_rightLeader.setSensorPhase(false);
+        m_leftLeader.setInverted(false);
+        m_leftLeader.setSensorPhase(false);
+        m_rightLeader.setInverted(true);
+        m_rightLeader.setSensorPhase(true);
         m_rightFollower.follow(m_rightLeader);
         m_rightFollower.setInverted(InvertType.FollowMaster);
         m_leftFollower.follow(m_leftLeader);
@@ -141,6 +147,9 @@ public class DriveTrain extends SubsystemBase{
         // Invert Drive Variables
         m_invSpeed = 1;
         m_isDriveInverted = false;
+
+        resetEncoders();
+        m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
       
         // Tuning Params //
 
@@ -152,6 +161,33 @@ public class DriveTrain extends SubsystemBase{
 
         // End of Tuning Params //
 
+    }
+
+    @Override
+    public void periodic() {
+        updateOdometry();
+    }
+
+    //  Odometry and PathWeaver methods
+    public void updateOdometry() {
+        m_odometry.update(m_gyro.getRotation2d(), getLeftEncoderPosition(), getRightEncoderPosition());
+    }
+
+    public Pose2d getPose() {
+        return m_odometry.getPoseMeters();
+    }
+
+    public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+        return new DifferentialDriveWheelSpeeds(getLeftEncoderVelocity(), getRightEncoderVelocity());
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        resetEncoders();
+        m_odometry.resetPosition(pose, m_gyro.getRotation2d());
+    }
+
+    public void setMaxOutput(double maxOutput) {
+        m_diffDrive.setMaxOutput(maxOutput);
     }
 
     // Encoder methods
@@ -186,7 +222,8 @@ public class DriveTrain extends SubsystemBase{
 
     // Gyro methods
     public double getHeading() {
-        return Math.IEEEremainder(m_gyro.getAngle(), 360);
+        //return Math.IEEEremainder(m_gyro.getAngle(), 360);
+        return m_gyro.getRotation2d().getDegrees();
     }
 
     public double getRawAngle() {
@@ -195,6 +232,18 @@ public class DriveTrain extends SubsystemBase{
 
     public AHRS getGyro() {
         return m_gyro;
+    }
+
+    public void resetGyro() {
+        m_gyro.reset();
+    }
+
+    public double getAverageEncoderDistance() {
+        return (getLeftEncoderPosition() + getRightEncoderPosition()) / 2.0;
+    }
+
+    public double getTurnRate() {
+        return -m_gyro.getRate();
     }
 
     // Drive Train Methods
@@ -236,6 +285,12 @@ public class DriveTrain extends SubsystemBase{
 
     public void teleopDrive(double speedValue, double rotationValue) {
         m_diffDrive.arcadeDrive(deadband(m_invSpeed * speedValue), deadband(-rotationValue));
+    }
+
+    public void tankDriveVolts(double leftVolts, double rightVolts) {
+        m_leftLeader.setVoltage(leftVolts);
+        m_rightLeader.setVoltage(rightVolts);
+        feedWatchdog();
     }
 
     public void motionMagicStartConfigDrive(double lengthInTicks) {
