@@ -190,22 +190,28 @@ public class DriveTrain extends SubsystemBase{
         m_diffDrive.setMaxOutput(maxOutput);
     }
 
+    public DifferentialDrive getDiffDrive() {
+        return m_diffDrive;
+    }
+
     // Encoder methods
     public void resetEncoders() {
         m_leftLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
         m_rightLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
+        m_leftLeader.setSelectedSensorPosition(0,kPID_TURN,0);
+        m_rightLeader.setSelectedSensorPosition(0,kPID_TURN,0);
     }
 
     public double getLeftEncoderPosition() {
-        return m_leftLeader.getSelectedSensorPosition();
+        return -m_leftLeader.getSelectedSensorPosition();
     }
 
     public double getRightEncoderPosition() {
-        return m_leftLeader.getSelectedSensorPosition();
+        return m_rightLeader.getSelectedSensorPosition();
     }
 
     public double getLeftEncoderVelocity() {
-        return m_leftLeader.getSelectedSensorVelocity();
+        return -m_leftLeader.getSelectedSensorVelocity();
     }
 
     public double getRightEncoderVelocity() {
@@ -279,12 +285,8 @@ public class DriveTrain extends SubsystemBase{
 
     }
 
-    public void teleopDrive(double speedValue, double rotationValue, boolean isSquared) {
-        m_diffDrive.arcadeDrive(deadband(m_invSpeed * speedValue), deadband(-rotationValue), isSquared);
-    }
-
     public void teleopDrive(double speedValue, double rotationValue) {
-        m_diffDrive.arcadeDrive(deadband(m_invSpeed * speedValue), deadband(-rotationValue));
+        m_diffDrive.arcadeDrive(deadband(m_invSpeed * speedValue), deadband(rotationValue));
     }
 
     public void tankDriveVolts(double leftVolts, double rightVolts) {
@@ -294,6 +296,7 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public void motionMagicStartConfigDrive(double lengthInTicks) {
+
         resetEncoders();
 
         m_leftLeader.configMotionCruiseVelocity(kMotionCruiseVelocity, kTimeoutMs);
@@ -324,15 +327,18 @@ public class DriveTrain extends SubsystemBase{
     public void motionMagicStartConfigsTurn(boolean isCCWturn, double lengthInTicks){   
 
         resetEncoders();
-		m_leftLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
-		m_rightLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
+
 		m_leftLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
 		m_leftLeader.configMotionAcceleration(1000, kTimeoutMs);
 		m_rightLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
 		m_rightLeader.configMotionAcceleration(1000, kTimeoutMs);
 
+        m_leftLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
+		m_rightLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
+
         m_leftSetpoint = lengthInTicks;
         m_rightSetpoint = -lengthInTicks;
+        
 
 	}
 
@@ -341,21 +347,23 @@ public class DriveTrain extends SubsystemBase{
         m_leftLeader.set(ControlMode.MotionMagic, arc_in_ticks);
 		m_rightLeader.set(ControlMode.MotionMagic, -arc_in_ticks);
 
-        double currentL = getLeftEncoderPosition();
-        double currentR = getRightEncoderPosition();
+        double m_currentL = getLeftEncoderPosition();
+        double m_currentR = getRightEncoderPosition();
 
-        int targetTicks = Math.abs((int)arc_in_ticks);
+        int m_targetTicks = Math.abs((int)arc_in_ticks);
 
         m_diffDrive.feedWatchdog();
 
-        return (targetTicks - currentL) < kAllowableCloseLoopError && (targetTicks - currentR) < kAllowableCloseLoopError;
+        return (m_targetTicks - m_currentL) < kAllowableCloseLoopError && (m_targetTicks - m_currentR) < kAllowableCloseLoopError;
     }
 
     public void motionMagicEndConfigTurn(){
-		//m_leftLeader.configMotionCruiseVelocity(16636, kTimeoutMs);
-		//m_leftLeader.configMotionAcceleration(8318, kTimeoutMs);
-		//m_rightLeader.configMotionCruiseVelocity(16636, kTimeoutMs);
-		//m_rightLeader.configMotionAcceleration(8318, kTimeoutMs);
+
+		m_leftLeader.configMotionCruiseVelocity(kMotionCruiseVelocity, kTimeoutMs);
+        m_leftLeader.configMotionAcceleration(kMotionAcceleration, kTimeoutMs);
+        m_rightLeader.configMotionCruiseVelocity(kMotionCruiseVelocity, kTimeoutMs);
+        m_rightLeader.configMotionAcceleration(kMotionAcceleration, kTimeoutMs);
+
 	}
 
     public double getLeftSetPoint() {
@@ -392,6 +400,14 @@ public class DriveTrain extends SubsystemBase{
         m_leftFollower.configOpenloopRamp(m_secondsFromNeutral);
         m_rightLeader.configOpenloopRamp(m_secondsFromNeutral);
         m_rightFollower.configOpenloopRamp(m_secondsFromNeutral);
+    }
+
+    public double getOpenLoopRamp() {
+        return m_secondsFromNeutral;
+    }
+
+    public double getMaxVel() {
+        return m_driveAbsMax;
     }
 
     public void feedWatchdog() {
