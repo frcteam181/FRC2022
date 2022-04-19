@@ -7,7 +7,7 @@ public final class Constants {
 
     // Robot Characteristics
     public static final double kWheelDiameterMeters = Units.inchesToMeters(6);
-    public static final double kTrackwidthMeters = Units.inchesToMeters(11);
+    public static final double kTrackWidthMeters = Units.inchesToMeters(11);
     public static final int kGearRatio = 1;
     public static final int kMaxRPM = 5330;
 
@@ -15,7 +15,7 @@ public final class Constants {
     public static final double kExpectedVelocity = (kMaxRPM/600) * kCountsPerRevolution;
 	public final static double kTurnTravelUnitsPerRotation = 3600;
 	public final static int kEncoderUnitsPerRotation = 51711; // 17598; Measure This!!!
-    public static final double kEncoderTicksPerMeter = (kCountsPerRevolution * kGearRatio) / (Math.PI * kWheelDiameterMeters);
+    public static final double kEncoderTicksPerInch = (kCountsPerRevolution * kGearRatio) / (Math.PI * Units.metersToInches(kWheelDiameterMeters));
     public static final double kEncoderTicksPerDegree = kEncoderUnitsPerRotation / 360;
 
     // values for your robot.
@@ -25,7 +25,7 @@ public final class Constants {
     public static final double kPDriveVel = 3.1519;
     public static final double kPDrivePos = 14.356;
     public static final double kDDrivePos = 1717.1;
-    public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
+    public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackWidthMeters);
     public static final double kMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;
     // Reasonable baseline values for a RAMSETE follower in units of meters and seconds
@@ -46,8 +46,8 @@ public final class Constants {
 
     // Drive Train gains and variables
     public static final double kDriveAbsMax = 1;
-    public static final Gains kDriveGains = new Gains(0.04, 0, 0, 0, 100, 1.0);
-    public static final Gains kTurnGains = new Gains(4.5,   0, 0, 0, 200, 1.0);
+    public static final Gains kDriveGains = new Gains(0.004, 0, 0, 0.5, 100, 1.0);
+    public static final Gains kTurnGains = new Gains(4.5,   0, 0, 0.5, 200, 1.0);
     public static final Gains kVelGains = new Gains(0,        0, 0, 0.00, 300, 1.0);
     public static final Gains kMotProfGains = new Gains(0,    0, 0, 0.45, 400, 1.0);
 

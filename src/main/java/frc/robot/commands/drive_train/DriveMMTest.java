@@ -1,6 +1,6 @@
 package frc.robot.commands.drive_train;
 
-import static frc.robot.Constants.*;
+import static frc.robot.Constants.kEncoderTicksPerInch;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -45,7 +45,7 @@ public class DriveMMTest extends CommandBase{
     public void initialize() {
     
         STABLE_ITERATIONS_BEFORE_FINISHED = (int) m_iterationEntry.getDouble(5.0);
-        m_targetTicks = (m_targetPosEntry.getDouble(0) * 0.0254) * kEncoderTicksPerMeter;
+        m_targetTicks = m_targetPosEntry.getDouble(0) * kEncoderTicksPerInch;
         m_targetTicksEntry.forceSetDouble((int) m_targetTicks);
         m_count = 0;
         m_driveTrain.resetDrivePIDValues(m_kpEntry.getDouble(0.0), m_kiEntry.getDouble(0.0), m_kfEntry.getDouble(0), m_kfEntry.getDouble(0));
