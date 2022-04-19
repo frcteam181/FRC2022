@@ -46,8 +46,8 @@ public final class Constants {
 
     // Drive Train gains and variables
     public static final double kDriveAbsMax = 1;
-    public static final Gains kDriveGains = new Gains(0.04, 0, 0, 0, 100, 1.0);
-    public static final Gains kTurnGains = new Gains(4.5,   0, 0, 0, 200, 1.0);
+    public static final Gains kDriveGains = new Gains(0.04, 0, 0, 0.41, 100, 1.0);
+    public static final Gains kTurnGains = new Gains(0.04,   0, 0, 0.41, 200, 1.0);
     public static final Gains kVelGains = new Gains(0,        0, 0, 0.00, 300, 1.0);
     public static final Gains kMotProfGains = new Gains(0,    0, 0, 0.45, 400, 1.0);
 

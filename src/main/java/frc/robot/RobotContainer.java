@@ -249,8 +249,7 @@ public class RobotContainer {
     m_testDriveTab.addNumber("L-Setpoint", m_driveTrain::getLeftSetPoint)          .withPosition(3, 3).withSize(1, 1);
     m_testDriveTab.addNumber("L-Error", m_driveTrain::getLeftEncoderError)          .withPosition(3, 4).withSize(1, 1);
 
-    m_testDriveTab.addNumber("Left Steady State", m_driveTrain::getLeftEncoderPosition).withPosition(3, 0).withSize(3, 3).withWidget(BuiltInWidgets.kGraph);
-    m_testDriveTab.addNumber("Left Steady State", m_driveTrain::getLeftSetPoint);
+    m_testDriveTab.addDoubleArray("Left Steady State", m_driveTrain::getLeftValues).withPosition(3, 0).withSize(3, 3).withWidget(BuiltInWidgets.kGraph);
 
     // Column 4
     m_testDriveTab.addNumber("L-Pos", m_driveTrain::getLeftEncoderPosition)          .withPosition(4, 3).withSize(1, 1);
@@ -271,7 +270,7 @@ public class RobotContainer {
     m_testDriveTab.add("Update Limiters", new UpdateDriveLimiters(m_driveTrain))     .withPosition(8, 6).withSize(2, 1);
 
     // Column 9
-    m_testDriveTab.addNumber("Right Steady State", m_driveTrain::getRightEncoderPosition).withPosition(9, 0).withSize(3, 3).withWidget(BuiltInWidgets.kGraph);
+    m_testDriveTab.addDoubleArray("Right Steady State", m_driveTrain::getRightValues).withPosition(9, 0).withSize(3, 3).withWidget(BuiltInWidgets.kGraph);
 
     // Column 10
     m_testDriveTab.addNumber("R-Setpoint", m_driveTrain::getRightSetPoint)          .withPosition(10, 3).withSize(1, 1);

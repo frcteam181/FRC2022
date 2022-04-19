@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -21,10 +22,14 @@ public class Intake extends SubsystemBase{
     private DigitalInput m_intakeSoftStop;
 
     private DoubleSolenoid m_intakePiston;
+
+    private Compressor m_compressor;
     
     public Intake() {
 
         m_intakePiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 6, 7);
+
+        m_compressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
         m_intakeMotor = new CANSparkMax(kINTAKE, MotorType.kBrushless);
 
@@ -42,6 +47,8 @@ public class Intake extends SubsystemBase{
         m_intakeSoftStop = new DigitalInput(0);
 
         intakeUp();
+
+        m_compressor.disable();
 
     }
 

@@ -16,9 +16,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -46,6 +44,9 @@ public class DriveTrain extends SubsystemBase{
 
     // Odometry class for tracking robot pose
     private final DifferentialDriveOdometry m_odometry;
+
+    private final double m_leftValues[];
+    private final double m_rightValues[];
 
     public DriveTrain() {
 
@@ -108,10 +109,10 @@ public class DriveTrain extends SubsystemBase{
         m_leftLeader.setNeutralMode(NeutralMode.Brake);
 
         // Setup quadrature as primary encoder for PID driving
-        m_rightLeader.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, kPID_PRIMARY, 0);
         m_leftLeader.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, kPID_PRIMARY, 0);
-        m_rightLeader.setSelectedSensorPosition(0, kSlotDrive, 0);
+        m_rightLeader.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, kPID_PRIMARY, 0);
         m_leftLeader.setSelectedSensorPosition(0, kSlotDrive, 0);
+        m_rightLeader.setSelectedSensorPosition(0, kSlotDrive, 0);
     
         // select profile slot
         m_leftLeader.selectProfileSlot(kSlotDrive, kPID_PRIMARY);
@@ -150,16 +151,9 @@ public class DriveTrain extends SubsystemBase{
 
         resetEncoders();
         m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
-      
-        // Tuning Params //
 
-        NetworkTable m_driveTestTable = NetworkTableInstance.getDefault().getTable("Shuffleboard").getSubTable("Drive Testing");
-
-        m_driveAbsMaxEntry = m_driveTestTable.getEntry("Drive Max");
-        m_secondsFromNeutralEntry = m_driveTestTable.getEntry("Forward Limiter");
-        m_gyro.reset();
-
-        // End of Tuning Params //
+        m_leftValues = new double[2];
+        m_rightValues = new double[2];
 
     }
 
@@ -198,8 +192,8 @@ public class DriveTrain extends SubsystemBase{
     public void resetEncoders() {
         m_leftLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
         m_rightLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
-        m_leftLeader.setSelectedSensorPosition(0,kPID_TURN,0);
-        m_rightLeader.setSelectedSensorPosition(0,kPID_TURN,0);
+        //m_leftLeader.setSelectedSensorPosition(0,kPID_TURN,0);
+        //m_rightLeader.setSelectedSensorPosition(0,kPID_TURN,0);
     }
 
     public double getLeftEncoderPosition() {
@@ -224,6 +218,18 @@ public class DriveTrain extends SubsystemBase{
 
     public double getRightEncoderError() {
         return (getRightSetPoint() - getRightEncoderPosition());
+    }
+
+    public double[] getLeftValues() {
+        m_leftValues[0] = getLeftEncoderPosition();
+        m_leftValues[1] = getLeftSetPoint();
+        return m_leftValues;
+    }
+
+    public double[] getRightValues() {
+        m_rightValues[0] = getRightEncoderPosition();
+        m_rightValues[1] = getRightSetPoint();
+        return m_rightValues;
     }
 
     // Gyro methods
@@ -333,8 +339,8 @@ public class DriveTrain extends SubsystemBase{
 		m_rightLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
 		m_rightLeader.configMotionAcceleration(1000, kTimeoutMs);
 
-        m_leftLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
-		m_rightLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
+        m_leftLeader.selectProfileSlot(kSlotTurning, kPID_PRIMARY);
+		m_rightLeader.selectProfileSlot(kSlotTurning, kPID_PRIMARY);
 
         m_leftSetpoint = lengthInTicks;
         m_rightSetpoint = -lengthInTicks;
