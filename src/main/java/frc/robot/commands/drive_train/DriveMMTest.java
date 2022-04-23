@@ -48,7 +48,7 @@ public class DriveMMTest extends CommandBase{
         m_targetTicks = (m_targetPosEntry.getDouble(0) * 0.0254) * kEncoderTicksPerMeter;
         m_targetTicksEntry.forceSetDouble((int) m_targetTicks);
         m_count = 0;
-        m_driveTrain.resetDrivePIDValues(m_kpEntry.getDouble(0.0), m_kiEntry.getDouble(0.0), m_kfEntry.getDouble(0), m_kfEntry.getDouble(0));
+        //m_driveTrain.resetDrivePIDValues(m_kpEntry.getDouble(0.0), m_kiEntry.getDouble(0.0), m_kfEntry.getDouble(0), m_kfEntry.getDouble(0));
         m_driveTrain.motionMagicStartConfigDrive(m_targetTicks);
     }
 

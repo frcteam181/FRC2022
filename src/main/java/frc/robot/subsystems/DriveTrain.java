@@ -59,7 +59,6 @@ public class DriveTrain extends SubsystemBase{
         // Factory default the talons
         m_leftLeader.configAllSettings(config);
         m_rightLeader.configAllSettings(config);
-        //m_rightFollower.configAllSettings(config); ???
 
         // Set all the configuration values that are common across
         // both sides of the drivetrain
@@ -86,9 +85,9 @@ public class DriveTrain extends SubsystemBase{
         config.slot1.kP = kTurnGains.kP;
         config.slot1.kI = kTurnGains.kI;
         config.slot1.kD = kTurnGains.kD;
-        config.slot1.allowableClosedloopError = 10;
         config.slot1.integralZone = kTurnGains.kIzone;
         config.slot1.closedLoopPeakOutput = kTurnGains.kPeakOutput;
+        config.slot1.allowableClosedloopError = 10;
         config.slot1.closedLoopPeriod = 1; // 1 ms
 
         m_leftLeader.configAllSettings(config);
@@ -96,7 +95,7 @@ public class DriveTrain extends SubsystemBase{
 
         // Set the followers and inverts
         m_leftLeader.setInverted(false);
-        m_leftLeader.setSensorPhase(false);
+        m_leftLeader.setSensorPhase(true);
         m_rightLeader.setInverted(true);
         m_rightLeader.setSensorPhase(true);
         m_rightFollower.follow(m_rightLeader);
@@ -192,12 +191,10 @@ public class DriveTrain extends SubsystemBase{
     public void resetEncoders() {
         m_leftLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
         m_rightLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
-        //m_leftLeader.setSelectedSensorPosition(0,kPID_TURN,0);
-        //m_rightLeader.setSelectedSensorPosition(0,kPID_TURN,0);
     }
 
     public double getLeftEncoderPosition() {
-        return -m_leftLeader.getSelectedSensorPosition();
+        return m_leftLeader.getSelectedSensorPosition();
     }
 
     public double getRightEncoderPosition() {
@@ -205,7 +202,7 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public double getLeftEncoderVelocity() {
-        return -m_leftLeader.getSelectedSensorVelocity();
+        return m_leftLeader.getSelectedSensorVelocity();
     }
 
     public double getRightEncoderVelocity() {
@@ -221,14 +218,14 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public double[] getLeftValues() {
-        m_leftValues[0] = getLeftEncoderPosition();
-        m_leftValues[1] = getLeftSetPoint();
+        m_leftValues[0] = getLeftEncoderPosition() / (kEncoderTicksPerMeter * 0.0254);
+        m_leftValues[1] = getLeftSetPoint() / (kEncoderTicksPerMeter * 0.0254);
         return m_leftValues;
     }
 
     public double[] getRightValues() {
-        m_rightValues[0] = getRightEncoderPosition();
-        m_rightValues[1] = getRightSetPoint();
+        m_rightValues[0] = getRightEncoderPosition() / (kEncoderTicksPerMeter * 0.0254);
+        m_rightValues[1] = getRightSetPoint() / (kEncoderTicksPerMeter * 0.0254);
         return m_rightValues;
     }
 
@@ -362,15 +359,6 @@ public class DriveTrain extends SubsystemBase{
 
         return (m_targetTicks - m_currentL) < kAllowableCloseLoopError && (m_targetTicks - m_currentR) < kAllowableCloseLoopError;
     }
-
-    public void motionMagicEndConfigTurn(){
-
-		m_leftLeader.configMotionCruiseVelocity(kMotionCruiseVelocity, kTimeoutMs);
-        m_leftLeader.configMotionAcceleration(kMotionAcceleration, kTimeoutMs);
-        m_rightLeader.configMotionCruiseVelocity(kMotionCruiseVelocity, kTimeoutMs);
-        m_rightLeader.configMotionAcceleration(kMotionAcceleration, kTimeoutMs);
-
-	}
 
     public double getLeftSetPoint() {
         return m_leftSetpoint;

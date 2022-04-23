@@ -50,7 +50,7 @@ public class TurnToAngleTest extends CommandBase {
         STABLE_ITERATIONS_BEFORE_FINISHED = (int) m_iterationEntry.getDouble(5.0);
         m_startTime = Timer.getFPGATimestamp();
         m_count = 0;
-        m_driveTrain.resetTurnPIDValues(m_turnKp, m_turnKi, m_turnKd, m_turnKf);
+        //m_driveTrain.resetTurnPIDValues(m_turnKp, m_turnKi, m_turnKd, m_turnKf);
         m_driveTrain.motionMagicStartConfigsTurn((m_arcLengthTicks < 0), m_arcLengthTicks);
 
     }
@@ -72,7 +72,6 @@ public class TurnToAngleTest extends CommandBase {
         double m_driveDuration = Timer.getFPGATimestamp() - m_startTime;
         m_driveDurationEntry.setDouble(m_driveDuration);
         m_driveTrain.teleopDrive(0, 0);
-        m_driveTrain.motionMagicEndConfigTurn();
 
     }
 
