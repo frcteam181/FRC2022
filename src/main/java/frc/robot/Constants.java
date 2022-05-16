@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
 
 public final class Constants {
 
@@ -56,7 +57,7 @@ public final class Constants {
     public static final int kOPERATOR_CONTROLLER = 1;
     public static final int kCLIMBER_CONTROLLER = 2;
     public static final double kDriverDeadband = 0.2;
-    public static final double kOperatorDeadband = 0.2;
+    public static final double kOperatorDeadband = 0.1;
 
     // Intake Variables
     public static final Gains kIntakeGains = new Gains(0, 0, 0, 0, 100, 1);
@@ -66,19 +67,20 @@ public final class Constants {
     public static final double kBaseSpeed = 1;
 
     // Climber Variables
-    public static final double kClimbSpeedLeftUp = 1;
-    public static final double kClimbSpeedRightUp = 1;
-    public static final double kClimbSpeedLeftDown = 1;
-    public static final double kClimbSpeedRightDown = 1;
-    public static final double kTiltSpeed = 0.5;
+    public static final Gains kClimberGains = new Gains(0,    0, 0, 0.45, 400, 1.0);
+    public static final int kCLIMBER_PID_SLOT = 0;
 
     // Shooter gains and variables
-    public static final Gains kShooterGains = new Gains(0, 0, 0, 0, 100, 1);
+    public static final Gains kShooterGains = new Gains(0.1, 0, 0, 0, 100, 1);
     public static final double kBaseSpeedShoot = 0.5;
     public static final double kNearShot = 0.5;
     public static final double kMidShot = 0.6;
     public static final double kFarShot = 0.8;
     public static final double kSpitShot = 0.25;
+
+    // Ball Color
+    public static final Color kRedCargo = new Color(0.457, 0.373, 0.167);
+    public static final Color kBlueCargo = new Color(0.215, 0.441, 0.342);
 
     // Do not change anything after this line unless you rewire the robot and
     // update the spreadsheet!
@@ -86,22 +88,23 @@ public final class Constants {
     // https://docs.google.com/spreadsheets/d/12oIY3QIFFsC3DQdTJzkeNdQm-VWWuzg8NxCcLUb8LFU/edit#gid=0
 
     // TalonSRXs (CAN ID)
-    public static final int kLEFT_LEADER = 2;
     public static final int kLEFT_FOLLOWER = 1;
-    public static final int kRIGHT_LEADER = 4;
+    public static final int kLEFT_LEADER = 2;
     public static final int kRIGHT_FOLLOWER = 3;
+    public static final int kRIGHT_LEADER = 4;
 
     // SparkMaxs (CAN ID)
-    public static final int kHORIZONTAL_BELT = 6;
     public static final int kVERTICAL_BELT = 5;
+    public static final int kHORIZONTAL_BELT = 6;
     public static final int kINTAKE = 7;
     public static final int kSHOOTER = 8;
-    public static final int kLEFT_CLIMBER_TILT = 9;
-    public static final int kRIGHT_CLIMBER_TILT = 10;
+    public static final int kCLIMBER_LEFT = 9;
+    public static final int kCLIMBER_RIGHT = 10;
 
-    // VictorSPs (PWM ID)
-    public static final int kLEFT_CLIMBER_PULL = 0;
-    public static final int kRIGHT_CLIMBER_PULL = 1; 
+    // Digital Input (DIO ID)
+    public static final int kTOP_SWITCH = 0;
+    public static final int kMID_SWITCH = 1;
+    public static final int kBOTTOM_SWITCH = 2;
 
     /** ---- Flat constants, you should not need to change these ---- */
 	/* We allow either a 0 or 1 when selecting an ordinal for remote devices [You can have up to 2 devices assigned remotely to a talon/victor] */

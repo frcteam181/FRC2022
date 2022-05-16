@@ -5,11 +5,6 @@
         "header": {
           "open": true
         }
-      },
-      "Talon SRX[2]/Quad Encoder": {
-        "header": {
-          "open": true
-        }
       }
     },
     "Solenoids": {
@@ -17,17 +12,26 @@
         "header": {
           "open": true
         }
+      },
+      "window": {
+        "visible": true
       }
     }
   },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Climber": "Subsystem",
       "/LiveWindow/Conveyor": "Subsystem",
+      "/LiveWindow/DriveTrain": "Subsystem",
       "/LiveWindow/DriveTrainTalonSRX": "Subsystem",
       "/LiveWindow/Intake": "Subsystem",
       "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
       "/LiveWindow/Ungrouped/DigitalInput[0]": "Digital Input",
+      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[4]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
       "/LiveWindow/Ungrouped/Talon SRX [1]": "Motor Controller",
       "/LiveWindow/Ungrouped/Talon SRX [3]": "Motor Controller",
@@ -40,7 +44,16 @@
       "/Shuffleboard/Drive Testing/Turn MM 180": "Command",
       "/Shuffleboard/Drive Testing/Turn MM 90": "Command",
       "/Shuffleboard/Drive Testing/Turn MM Test": "Command",
-      "/Shuffleboard/Drive Testing/Update Limits": "Command"
+      "/Shuffleboard/Drive Testing/Update Limits": "Command",
+      "/Shuffleboard/Test Drive/Differential Drive": "DifferentialDrive",
+      "/Shuffleboard/Test Drive/Drive -100in": "Command",
+      "/Shuffleboard/Test Drive/Drive 100in": "Command",
+      "/Shuffleboard/Test Drive/Drive Xin": "Command",
+      "/Shuffleboard/Test Drive/Gyro (NavX)": "Gyro",
+      "/Shuffleboard/Test Drive/Turn -90deg": "Command",
+      "/Shuffleboard/Test Drive/Turn 90deg": "Command",
+      "/Shuffleboard/Test Drive/Turn Xdeg": "Command",
+      "/Shuffleboard/Test Drive/Update Limiters": "Command"
     },
     "windows": {
       "/Shuffleboard/Competition/Choose Auto": {

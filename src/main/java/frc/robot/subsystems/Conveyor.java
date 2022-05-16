@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-//import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,12 +11,9 @@ public class Conveyor  extends SubsystemBase{
     private CANSparkMax m_vertticalBelt, m_horizontalBelt;
     private CANSparkMax m_shooter; 
 
-    //private SparkMaxPIDController m_verticalBeltPID, m_horizontalBeltPID;
-
     public Conveyor() {
         m_vertticalBelt = new CANSparkMax(kVERTICAL_BELT, MotorType.kBrushless);
         m_horizontalBelt = new CANSparkMax(kHORIZONTAL_BELT, MotorType.kBrushless);
-        m_shooter = new CANSparkMax(kSHOOTER, MotorType.kBrushless);
     }
 
     public void horizontalBelt_move(double horizontalValue) {
@@ -48,19 +44,6 @@ public class Conveyor  extends SubsystemBase{
         m_vertticalBelt.set(0);
         m_shooter.set(0);
     }
-    
-      /*  public double deadband(double value) {
-        // Upped Deadband 
-        if (value >= kOperatorDeadband)
-            return value;
-        // Lower Deadband 
-        if (value <= -kOperatorDeadband)
-            return value;
-        // Outside Deadband 
-        return 0;
-    } 
-    */
-    
 
     public double deadband(double value) {
         /** Upped Deadband */

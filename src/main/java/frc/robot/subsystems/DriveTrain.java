@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class DriveTrain extends SubsystemBase{
+public class DriveTrain extends SubsystemBase {
 
     private WPI_TalonSRX m_leftLeader, m_leftFollower, m_rightLeader, m_rightFollower;
 
@@ -43,10 +43,10 @@ public class DriveTrain extends SubsystemBase{
     private boolean m_isDriveInverted;
 
     // Odometry class for tracking robot pose
-    private final DifferentialDriveOdometry m_odometry;
+    private DifferentialDriveOdometry m_odometry;
 
-    private final double m_leftValues[];
-    private final double m_rightValues[];
+    private double m_leftValues[];
+    private double m_rightValues[];
 
     public DriveTrain() {
 
@@ -117,9 +117,6 @@ public class DriveTrain extends SubsystemBase{
         m_leftLeader.selectProfileSlot(kSlotDrive, kPID_PRIMARY);
         m_rightLeader.selectProfileSlot(kSlotDrive, kPID_PRIMARY);
     
-        // We have observed a couple times where the robot loses control and continues without operator
-        // input, changed the TalonSRX objects to be WPI_Talons so we can use the differential drive.
-        // We aren't going to actually drive with it.  We are just going to use it for the Watchdog timer.
         m_diffDrive = new DifferentialDrive(m_leftLeader, m_rightLeader);
 
         /* Set status frame periods */
@@ -231,7 +228,6 @@ public class DriveTrain extends SubsystemBase{
 
     // Gyro methods
     public double getHeading() {
-        //return Math.IEEEremainder(m_gyro.getAngle(), 360);
         return m_gyro.getRotation2d().getDegrees();
     }
 
@@ -278,14 +274,8 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public void invertDrive() {
-
-        if (m_isDriveInverted == false) {
-            m_isDriveInverted = true;
-        } else {
-            m_isDriveInverted = false;
-        }
+        m_isDriveInverted = !m_isDriveInverted;
         m_invSpeed = m_invSpeed * -1;
-
     }
 
     public void teleopDrive(double speedValue, double rotationValue) {
@@ -410,25 +400,25 @@ public class DriveTrain extends SubsystemBase{
 
     public double getPIDValue(String slot, String value) {
         if (slot == "Drive") {
-            if (value == "Kp") {
+            if (value == "kP") {
                 return kDriveGains.kP;
-            } else if (value == "Ki") {
+            } else if (value == "kI") {
                 return kDriveGains.kI;
-            } else if (value == "Kd") {
+            } else if (value == "kD") {
                 return kDriveGains.kD;
-            } else if (value == "Kf") {
+            } else if (value == "kF") {
                 return kDriveGains.kF;
             } else {
                 return 0.0;
             }
         } else if (slot == "Turn"){
-            if (value == "Kp") {
+            if (value == "kP") {
                 return kTurnGains.kP;
-            } else if (value == "Ki") {
+            } else if (value == "kI") {
                 return kTurnGains.kI;
-            } else if (value == "Kd") {
+            } else if (value == "kD") {
                 return kTurnGains.kD;
-            } else if (value == "Kf") {
+            } else if (value == "kF") {
                 return kTurnGains.kF;
             } else {
                 return 0.0;

@@ -10,7 +10,10 @@ public class ClimberDefaultCommand extends CommandBase {
 
     private final XboxController m_climberController;
 
+    private double m_leftValue;
+
     public ClimberDefaultCommand(Climber climber, XboxController climberController) {
+
         m_climber = climber;
         m_climberController = climberController;
 
@@ -18,13 +21,18 @@ public class ClimberDefaultCommand extends CommandBase {
     }
 
     @Override
+    public void initialize() {
+
+        m_leftValue = 0;
+
+    }
+
+    @Override
     public void execute() {
 
-        double m_leftValue, m_rightValue;
         m_leftValue = m_climberController.getRightY();
-        m_rightValue = m_climberController.getLeftY();
-        m_climber.move_leftClimber(m_leftValue);
-        m_climber.move_rightClimber(m_rightValue);
+
+        m_climber.moveClimber(m_leftValue);
         
     }
     

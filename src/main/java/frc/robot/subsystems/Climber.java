@@ -1,154 +1,99 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.*;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-public class Climber extends SubsystemBase{
+public class Climber extends SubsystemBase {
 
-    VictorSP m_leftClimberPull, m_rightClimberPull;
-    CANSparkMax m_leftClimberTilt, m_rightClimberTilt;
-    SlewRateLimiter m_rightLimiter, m_leftLimiter;
+    private CANSparkMax m_leftSpool, m_rightSpool;
+    private RelativeEncoder m_leftEncoder;
+    private SparkMaxPIDController m_leftPID;
+
+    private DoubleSolenoid m_leftPiston, m_rightPiston;
+
+    private boolean m_isClimberUp;
+
+    private double m_deadband = 0.1;
 
     public Climber() {
+
+        // Spools
+        m_leftSpool = new CANSparkMax(kCLIMBER_LEFT, MotorType.kBrushless);
+        m_rightSpool = new CANSparkMax(kCLIMBER_RIGHT, MotorType.kBrushless);
+
+        m_leftSpool.restoreFactoryDefaults();
+        m_rightSpool.restoreFactoryDefaults();
         
-        m_leftClimberPull = new VictorSP(kLEFT_CLIMBER_PULL);
-        m_rightClimberPull = new VictorSP(kRIGHT_CLIMBER_PULL);
+        m_leftSpool.setIdleMode(IdleMode.kBrake);
 
-        m_leftClimberTilt = new CANSparkMax(kLEFT_CLIMBER_TILT, MotorType.kBrushless);
-        m_rightClimberTilt = new CANSparkMax(kRIGHT_CLIMBER_TILT, MotorType.kBrushless);
-        m_rightClimberTilt.setInverted(true);
-        m_leftClimberTilt.setIdleMode(IdleMode.kBrake);
-        m_rightClimberTilt.setIdleMode(IdleMode.kBrake);
-        m_rightLimiter = new SlewRateLimiter(0.3);
-        m_leftLimiter = new SlewRateLimiter(0.3);
+        // Encoder
+        m_leftEncoder = m_leftSpool.getEncoder();
+        m_leftEncoder.setPosition(0); // ??? We need a better way to zero its position !!!
+
+        // PID
+        m_leftPID = m_leftSpool.getPIDController();
+        m_leftPID.setP(kClimberGains.kP, kCLIMBER_PID_SLOT);
+        m_leftPID.setI(kClimberGains.kI, kCLIMBER_PID_SLOT);
+        m_leftPID.setD(kClimberGains.kD, kCLIMBER_PID_SLOT);
+        m_leftPID.setFF(kClimberGains.kF, kCLIMBER_PID_SLOT);
+        m_leftPID.setIZone(kClimberGains.kIzone, kCLIMBER_PID_SLOT);
+        m_leftPID.setOutputRange(-kClimberGains.kPeakOutput, kClimberGains.kPeakOutput, kCLIMBER_PID_SLOT);
+
+        // Follower Spool
+        m_rightSpool.follow(m_leftSpool, true);
+
+        // Pistons
+        m_leftPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 1, 0);
+        m_rightPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 3, 2);
+
+        m_isClimberUp = false;
+
+        tiltClimber();
 
     }
-    
-    public void extend_climberRight() {
-        m_rightClimberPull.set(-kClimbSpeedRightUp);
+
+    public void tiltClimber() {
+        m_isClimberUp = !m_isClimberUp;
+        if(m_isClimberUp) {
+            m_leftPiston.set(Value.kForward);
+            m_rightPiston.set(Value.kForward);
+        } else {
+            m_leftPiston.set(Value.kReverse);
+            m_rightPiston.set(Value.kReverse);
+        }
     }
 
-    public void retract_climberRight() {
-        m_rightClimberPull.set(kClimbSpeedRightDown);
+    public void moveClimber(double speed) {
+        m_leftSpool.set(deadband(speed));
     }
 
-    public void move_rightClimber(double rightValue) {
-        m_rightClimberPull.set(clamp_climb_right(deadband(rightValue)));
+    public void autoMoveClimber(double position) {
+        m_leftPID.setReference(position, ControlType.kPosition);
     }
 
-    public void extend_climberLeft() {
-        m_leftClimberPull.set(-kClimbSpeedLeftUp);
-    }
-
-    public void retract_climberLeft() {
-        m_leftClimberPull.set(kClimbSpeedLeftDown);
-    }
-
-    public void move_leftClimber(double leftValue) {
-        m_leftClimberPull.set(clamp_climb_left(deadband(leftValue)));
-    }
-
-    public void stop_climber() {
-        m_leftClimberPull.set(0);
-        m_rightClimberPull.set(0);
-    }
-
-    public void tilt_climber_forward_withSlew() {
-        m_leftClimberTilt.set(m_leftLimiter.calculate(kTiltSpeed));
-        m_rightClimberTilt.set(m_rightLimiter.calculate(kTiltSpeed));
-    }
-
-    public void tilt_climber_backwards_withSlew() {
-        m_leftClimberTilt.set(m_leftLimiter.calculate(-kTiltSpeed));
-        m_rightClimberTilt.set(m_rightLimiter.calculate(-kTiltSpeed));
-    }
-
-    public void tilt_climber_forward() {
-        m_leftClimberTilt.set(kTiltSpeed);
-        m_rightClimberTilt.set(kTiltSpeed);
-    }
-
-    public void tilt_climber_backwards() {
-        m_leftClimberTilt.set(-kTiltSpeed);
-        m_rightClimberTilt.set(-kTiltSpeed);
-    }
-
-    public void tilt_climber_full_backwards() {
-        m_leftClimberTilt.set(-0.2);
-        m_rightClimberTilt.set(-0.2);
-    }
-    /*
-     public void tilt_climber_forward_right() {
-        m_rightClimberTilt.set(kTiltSpeed);
-    }
-
-     public void tilt_climber_backwards_right() {
-        m_rightClimberTilt.set(-kTiltSpeed);
-    }
-
-    /*
-     public void tilt_climber_forward_left() {
-        m_leftClimberTilt.set(kTiltSpeed);
-    }
-
-     public void tilt_climber_backwards_left() {
-        m_leftClimberTilt.set(-kTiltSpeed);
-    }
-
-    */
-
-    public void stop_climber_tilt() {
-        m_leftClimberTilt.set(0);
-        m_rightClimberTilt.set(0);
+    public void resetEncoder() {
+        m_leftEncoder.setPosition(0);
     }
 
     public double deadband(double value) {
         /** Upped Deadband */
-        if (value >= kOperatorDeadband)
-            return value;
+        if (value >= m_deadband)
+            return value; //kBaseSpeed;
         /** Lower Deadband */
-        if (value <= -kOperatorDeadband)
+        if (value <= -m_deadband)
             return value;
-        /** Outside Deadband */
+        /** Inside Deadband */
         return 0;
     }
 
-    /** Make sure the input to the set command is 1.0 >= x >= -1.0 **/
-	private double clamp_climb_left(double clampValue) {
-		/* Upper deadband */
-		if (clampValue >= kClimbSpeedLeftUp) {
-     		return kClimbSpeedLeftUp;
-   		}
-
-		/* Lower deadband */
-		if (clampValue <= -kClimbSpeedLeftDown) {
-      		return -kClimbSpeedLeftDown;
-    	}
-
-		/* Outside deadband */
-		return clampValue;
-  	}
-
-    /** Make sure the input to the set command is 1.0 >= x >= -1.0 **/
-	private double clamp_climb_right(double clampValue) {
-		/* Upper deadband */
-		if (clampValue >= kClimbSpeedRightUp) {
-     		return kClimbSpeedRightUp;
-   		}
-
-		/* Lower deadband */
-		if (clampValue <= -kClimbSpeedRightDown) {
-      		return -kClimbSpeedRightDown;
-    	}
-
-		/* Outside deadband */
-		return clampValue;
-  	}
-    
 }
