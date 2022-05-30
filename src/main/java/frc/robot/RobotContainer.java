@@ -42,7 +42,7 @@ public class RobotContainer {
   // Shuffleboard Tabs
   private TestDriveTab m_testDriveTab;
   private CompetitionTab m_competitionTab;
-  
+
   public RobotContainer() {
 
     // Subsystems
@@ -63,29 +63,35 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    
-    //return m_competitionTab.getAuto();
-  
+
+    // return m_competitionTab.getAuto();
+
     // Create a voltage constraint to ensure we don't accelerate too fast
-    var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(new SimpleMotorFeedforward(ksVolts, kvVoltSecondsPerMeter, kaVoltSecondsSquaredPerMeter), kDriveKinematics, 10);
+    var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
+        new SimpleMotorFeedforward(ksVolts, kvVoltSecondsPerMeter, kaVoltSecondsSquaredPerMeter), kDriveKinematics, 10);
 
     // Create config for trajectory
-    TrajectoryConfig config = new TrajectoryConfig(kMaxSpeedMetersPerSecond, kMaxAccelerationMetersPerSecondSquared).setKinematics(kDriveKinematics).addConstraint(autoVoltageConstraint);
+    TrajectoryConfig config = new TrajectoryConfig(kMaxSpeedMetersPerSecond, kMaxAccelerationMetersPerSecondSquared)
+        .setKinematics(kDriveKinematics).addConstraint(autoVoltageConstraint);
 
-    // An example trajectory to follow.  All units in meters.
-    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)), List.of(new Translation2d(1, 1), new Translation2d(2, -1)), new Pose2d(3, 0, new Rotation2d(0)), config);
+    // An example trajectory to follow. All units in meters.
+    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
+        List.of(new Translation2d(1, 1), new Translation2d(2, -1)), new Pose2d(3, 0, new Rotation2d(0)), config);
 
-    RamseteCommand ramseteCommand = new RamseteCommand(exampleTrajectory, m_driveTrain::getPose, new RamseteController(kRamseteB, kRamseteZeta), new SimpleMotorFeedforward(ksVolts, kvVoltSecondsPerMeter, kaVoltSecondsSquaredPerMeter), kDriveKinematics, m_driveTrain::getWheelSpeeds, new PIDController(kPDriveVel, 0, 0),
-            new PIDController(kPDriveVel, 0, 0),
-            // RamseteCommand passes volts to the callback
-            m_driveTrain::tankDriveVolts,
-            m_driveTrain);
+    RamseteCommand ramseteCommand = new RamseteCommand(exampleTrajectory, m_driveTrain::getPose,
+        new RamseteController(kRamseteB, kRamseteZeta),
+        new SimpleMotorFeedforward(ksVolts, kvVoltSecondsPerMeter, kaVoltSecondsSquaredPerMeter), kDriveKinematics,
+        m_driveTrain::getWheelSpeeds, new PIDController(kPDriveVel, 0, 0),
+        new PIDController(kPDriveVel, 0, 0),
+        // RamseteCommand passes volts to the callback
+        m_driveTrain::tankDriveVolts,
+        m_driveTrain);
 
     // Reset odometry to the starting pose of the trajectory.
     m_driveTrain.resetOdometry(exampleTrajectory.getInitialPose());
 
     // Run path following command, then stop at the end.
     return ramseteCommand.andThen(() -> m_driveTrain.tankDriveVolts(0, 0));
-    
+
   }
 }

@@ -9,14 +9,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
 
-public class Intake extends SubsystemBase{
+public class Intake extends SubsystemBase {
 
     private CANSparkMax m_intakeMotor;
     private SparkMaxPIDController m_intakePID;
 
     private DoubleSolenoid m_intakePiston;
     private boolean m_isIntakeUp;
-    
+
     public Intake() {
 
         // SparkMax
@@ -52,7 +52,7 @@ public class Intake extends SubsystemBase{
         m_intakePiston.set(DoubleSolenoid.Value.kForward);
     }
 
-    public void collectBalls(){
+    public void collectBalls() {
         m_intakeMotor.set(kIntakeSpeed);
     }
 
@@ -63,5 +63,5 @@ public class Intake extends SubsystemBase{
     public void stop() {
         m_intakeMotor.set(0);
     }
-    
+
 }

@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
 
-public class Conveyor  extends SubsystemBase {
+public class Conveyor extends SubsystemBase {
 
     private CANSparkMax m_belt;
 
@@ -36,6 +36,6 @@ public class Conveyor  extends SubsystemBase {
             return value;
         /** Outside Deadband */
         return 0;
-        
+
     }
 }

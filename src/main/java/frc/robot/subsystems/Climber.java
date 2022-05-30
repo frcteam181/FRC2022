@@ -30,7 +30,7 @@ public class Climber extends SubsystemBase {
 
         m_leftSpool.restoreFactoryDefaults();
         m_rightSpool.restoreFactoryDefaults();
-        
+
         m_leftSpool.setIdleMode(IdleMode.kBrake);
 
         // Encoder
@@ -60,7 +60,7 @@ public class Climber extends SubsystemBase {
     public void tiltClimber() {
 
         m_isClimberUp = !m_isClimberUp;
-        if(m_isClimberUp) {
+        if (m_isClimberUp) {
             m_leftPiston.set(Value.kForward);
             m_rightPiston.set(Value.kForward);
         } else {
@@ -86,13 +86,13 @@ public class Climber extends SubsystemBase {
 
         /** Upped Deadband */
         if (value >= m_deadband)
-            return value; //kBaseSpeed;
+            return value; // kBaseSpeed;
         /** Lower Deadband */
         if (value <= -m_deadband)
             return value;
         /** Inside Deadband */
         return 0;
-        
+
     }
 
 }

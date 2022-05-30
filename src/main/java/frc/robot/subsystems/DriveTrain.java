@@ -28,11 +28,12 @@ public class DriveTrain extends SubsystemBase {
     private DifferentialDrive m_diffDrive;
 
     // Creates a variable for Open Loop Ramp value a.k.a. Slew Rate.
-    // This is for tuning purposes. After tuned, update the kSecondsFromNeutral variable on Constants.java
+    // This is for tuning purposes. After tuned, update the kSecondsFromNeutral
+    // variable on Constants.java
     private double m_secondsFromNeutral, m_driveAbsMax;
     NetworkTableEntry m_secondsFromNeutralEntry, m_driveAbsMaxEntry;
 
-    //Motion Magic set points
+    // Motion Magic set points
     private double m_leftSetpoint, m_rightSetpoint;
 
     // Invert Drive
@@ -49,7 +50,7 @@ public class DriveTrain extends SubsystemBase {
 
         m_rightLeader = new WPI_TalonSRX(kRIGHT_LEADER);
         m_rightFollower = new WPI_TalonSRX(kRIGHT_FOLLOWER);
-        m_leftLeader  = new WPI_TalonSRX(kLEFT_LEADER);
+        m_leftLeader = new WPI_TalonSRX(kLEFT_LEADER);
         m_leftFollower = new WPI_TalonSRX(kLEFT_FOLLOWER);
         TalonSRXConfiguration config = new TalonSRXConfiguration();
 
@@ -99,7 +100,7 @@ public class DriveTrain extends SubsystemBase {
         m_rightFollower.setInverted(InvertType.FollowMaster);
         m_leftFollower.follow(m_leftLeader);
         m_leftFollower.setInverted(InvertType.FollowMaster);
-  
+
         // Neutral Mode to Help slow things down
         m_rightLeader.setNeutralMode(NeutralMode.Brake);
         m_leftLeader.setNeutralMode(NeutralMode.Brake);
@@ -109,29 +110,29 @@ public class DriveTrain extends SubsystemBase {
         m_rightLeader.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, kPID_PRIMARY, 0);
         m_leftLeader.setSelectedSensorPosition(0, kSlotDrive, 0);
         m_rightLeader.setSelectedSensorPosition(0, kSlotDrive, 0);
-    
+
         // select profile slot
         m_leftLeader.selectProfileSlot(kSlotDrive, kPID_PRIMARY);
         m_rightLeader.selectProfileSlot(kSlotDrive, kPID_PRIMARY);
-    
+
         m_diffDrive = new DifferentialDrive(m_leftLeader, m_rightLeader);
 
         /* Set status frame periods */
-		m_rightLeader.setStatusFramePeriod(StatusFrame.Status_12_Feedback1, 20, kTimeoutMs);
-		m_rightLeader.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1, 20, kTimeoutMs);
-		m_leftLeader.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, kTimeoutMs);		//Used remotely by right Talon, speed up
+        m_rightLeader.setStatusFramePeriod(StatusFrame.Status_12_Feedback1, 20, kTimeoutMs);
+        m_rightLeader.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1, 20, kTimeoutMs);
+        m_leftLeader.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, kTimeoutMs); // Used remotely by right
+                                                                                          // Talon, speed up
 
         m_leftLeader.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, kTimeoutMs);
         m_leftLeader.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, kTimeoutMs);
         m_rightLeader.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, kTimeoutMs);
         m_rightLeader.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, kTimeoutMs);
 
-    
         m_leftLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 35, 40, 1.0), 0);
         m_rightLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 35, 40, 1.0), 0);
 
-        //Creates a gyro
-        try{
+        // Creates a gyro
+        try {
             m_gyro = new AHRS(SerialPort.Port.kUSB1);
             m_gyro.enableLogging(true);
         } catch (RuntimeException ex) {
@@ -155,7 +156,7 @@ public class DriveTrain extends SubsystemBase {
         updateOdometry();
     }
 
-    //  Odometry and PathWeaver methods
+    // Odometry and PathWeaver methods
     public void updateOdometry() {
         m_odometry.update(m_gyro.getRotation2d(), getLeftEncoderPosition(), getRightEncoderPosition());
     }
@@ -186,8 +187,8 @@ public class DriveTrain extends SubsystemBase {
     // Encoder methods
     public void resetEncoders() {
 
-        m_leftLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
-        m_rightLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
+        m_leftLeader.setSelectedSensorPosition(0, kPID_PRIMARY, 0);
+        m_rightLeader.setSelectedSensorPosition(0, kPID_PRIMARY, 0);
 
     }
 
@@ -267,13 +268,13 @@ public class DriveTrain extends SubsystemBase {
 
     }
 
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private double clamp(double value) {
 
-        if (value >= m_driveAbsMax){
+        if (value >= m_driveAbsMax) {
             return m_driveAbsMax;
-        } 
-        
+        }
+
         if (value <= -m_driveAbsMax) {
             return -m_driveAbsMax;
         }
@@ -315,7 +316,7 @@ public class DriveTrain extends SubsystemBase {
 
         m_leftSetpoint = lengthInTicks;
         m_rightSetpoint = lengthInTicks;
-    
+
     }
 
     public boolean motionMagicDrive(double targetPosition) {
@@ -328,41 +329,43 @@ public class DriveTrain extends SubsystemBase {
 
         m_diffDrive.feedWatchdog();
 
-        return Math.abs(m_currentLetfPos - targetPosition) < kAllowableCloseLoopError && Math.abs(m_currentRightPos - targetPosition) < kAllowableCloseLoopError;
-    
+        return Math.abs(m_currentLetfPos - targetPosition) < kAllowableCloseLoopError
+                && Math.abs(m_currentRightPos - targetPosition) < kAllowableCloseLoopError;
+
     }
 
-    public void motionMagicStartConfigsTurn(boolean isCCWturn, double lengthInTicks){   
+    public void motionMagicStartConfigsTurn(boolean isCCWturn, double lengthInTicks) {
 
         resetEncoders();
 
-		m_leftLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
-		m_leftLeader.configMotionAcceleration(1000, kTimeoutMs);
-		m_rightLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
-		m_rightLeader.configMotionAcceleration(1000, kTimeoutMs);
+        m_leftLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
+        m_leftLeader.configMotionAcceleration(1000, kTimeoutMs);
+        m_rightLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
+        m_rightLeader.configMotionAcceleration(1000, kTimeoutMs);
 
         m_leftLeader.selectProfileSlot(kSlotTurning, kPID_PRIMARY);
-		m_rightLeader.selectProfileSlot(kSlotTurning, kPID_PRIMARY);
+        m_rightLeader.selectProfileSlot(kSlotTurning, kPID_PRIMARY);
 
         m_leftSetpoint = lengthInTicks;
         m_rightSetpoint = -lengthInTicks;
 
-	}
+    }
 
     public boolean motionMagicTurn(double arc_in_ticks) {
-    
+
         m_leftLeader.set(ControlMode.MotionMagic, arc_in_ticks);
-		m_rightLeader.set(ControlMode.MotionMagic, -arc_in_ticks);
+        m_rightLeader.set(ControlMode.MotionMagic, -arc_in_ticks);
 
         double m_currentL = getLeftEncoderPosition();
         double m_currentR = getRightEncoderPosition();
 
-        int m_targetTicks = Math.abs((int)arc_in_ticks);
+        int m_targetTicks = Math.abs((int) arc_in_ticks);
 
         m_diffDrive.feedWatchdog();
 
-        return (m_targetTicks - m_currentL) < kAllowableCloseLoopError && (m_targetTicks - m_currentR) < kAllowableCloseLoopError;
-    
+        return (m_targetTicks - m_currentL) < kAllowableCloseLoopError
+                && (m_targetTicks - m_currentR) < kAllowableCloseLoopError;
+
     }
 
     public double getLeftSetPoint() {
@@ -400,7 +403,7 @@ public class DriveTrain extends SubsystemBase {
         m_leftFollower.configOpenloopRamp(m_secondsFromNeutral);
         m_rightLeader.configOpenloopRamp(m_secondsFromNeutral);
         m_rightFollower.configOpenloopRamp(m_secondsFromNeutral);
-    
+
     }
 
     public double getOpenLoopRamp() {
@@ -429,7 +432,7 @@ public class DriveTrain extends SubsystemBase {
             } else {
                 return 0.0;
             }
-        } else if (slot == "Turn"){
+        } else if (slot == "Turn") {
             if (value == "kP") {
                 return kTurnGains.kP;
             } else if (value == "kI") {
@@ -446,5 +449,5 @@ public class DriveTrain extends SubsystemBase {
         }
 
     }
-    
+
 }

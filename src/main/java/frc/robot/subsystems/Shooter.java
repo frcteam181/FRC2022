@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
 
-public class Shooter extends SubsystemBase{
-    
+public class Shooter extends SubsystemBase {
+
     private CANSparkMax m_sparkShooter;
 
     private SparkMaxPIDController m_shooterPID;
@@ -35,7 +35,7 @@ public class Shooter extends SubsystemBase{
         m_shooterPID.setFF(kShooterGains.kF);
         m_shooterPID.setIZone(kShooterGains.kIzone);
         m_shooterPID.setOutputRange(0, kShooterGains.kPeakOutput);
-        
+
         m_shooterEncoder = m_sparkShooter.getEncoder();
 
         m_nearSpeed = 4000; // rpm
@@ -53,7 +53,7 @@ public class Shooter extends SubsystemBase{
 
     public void nearShot() {
 
-        //m_shooterPID.setReference(m_nearSpeed, ControlType.kVelocity);
+        // m_shooterPID.setReference(m_nearSpeed, ControlType.kVelocity);
         m_sparkShooter.set(0.8);
         m_isFarTarget = false;
 
