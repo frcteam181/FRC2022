@@ -4,8 +4,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.robot.Constants.*;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -13,16 +11,15 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import static frc.robot.Constants.*;
+
 public class Climber extends SubsystemBase {
 
     private CANSparkMax m_leftSpool, m_rightSpool;
     private RelativeEncoder m_leftEncoder;
     private SparkMaxPIDController m_leftPID;
-
     private DoubleSolenoid m_leftPiston, m_rightPiston;
-
     private boolean m_isClimberUp;
-
     private double m_deadband = 0.1;
 
     public Climber() {
@@ -56,13 +53,12 @@ public class Climber extends SubsystemBase {
         m_leftPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 1, 0);
         m_rightPiston = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 3, 2);
 
-        m_isClimberUp = false;
-
-        tiltClimber();
+        m_isClimberUp = true;
 
     }
 
     public void tiltClimber() {
+
         m_isClimberUp = !m_isClimberUp;
         if(m_isClimberUp) {
             m_leftPiston.set(Value.kForward);
@@ -71,6 +67,7 @@ public class Climber extends SubsystemBase {
             m_leftPiston.set(Value.kReverse);
             m_rightPiston.set(Value.kReverse);
         }
+
     }
 
     public void moveClimber(double speed) {
@@ -86,6 +83,7 @@ public class Climber extends SubsystemBase {
     }
 
     public double deadband(double value) {
+
         /** Upped Deadband */
         if (value >= m_deadband)
             return value; //kBaseSpeed;
@@ -94,6 +92,7 @@ public class Climber extends SubsystemBase {
             return value;
         /** Inside Deadband */
         return 0;
+        
     }
 
 }

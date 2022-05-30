@@ -7,7 +7,6 @@ import frc.robot.subsystems.Conveyor;
 public class ConveyorDefaultCommand extends CommandBase {
 
     private Conveyor m_conveyor;
-
     private final XboxController m_operatorController;
 
     public ConveyorDefaultCommand(Conveyor conveyor, XboxController operatorController) {
@@ -21,11 +20,9 @@ public class ConveyorDefaultCommand extends CommandBase {
     @Override
     public void execute() {
 
-        double m_verticalValue, m_horizontalValue;
-        m_verticalValue = m_operatorController.getLeftY();
+        double m_horizontalValue;
         m_horizontalValue = m_operatorController.getRightY();
-        m_conveyor.horizontalBelt_move(m_horizontalValue);
-        m_conveyor.verticalBelt_move(m_verticalValue);
+        m_conveyor.belt_move(m_horizontalValue);
 
     }
     

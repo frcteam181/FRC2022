@@ -18,13 +18,12 @@ public class ClimberDefaultCommand extends CommandBase {
         m_climberController = climberController;
 
         addRequirements(climber);
+
     }
 
     @Override
     public void initialize() {
-
         m_leftValue = 0;
-
     }
 
     @Override

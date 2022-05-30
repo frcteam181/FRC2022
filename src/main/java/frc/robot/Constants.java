@@ -78,7 +78,7 @@ public final class Constants {
     public static final double kFarShot = 0.8;
     public static final double kSpitShot = 0.25;
 
-    // Ball Color
+    // Cargo Color
     public static final Color kRedCargo = new Color(0.457, 0.373, 0.167);
     public static final Color kBlueCargo = new Color(0.215, 0.441, 0.342);
 

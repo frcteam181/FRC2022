@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.*;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -12,7 +10,6 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
@@ -22,12 +19,12 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import static frc.robot.Constants.*;
+
 public class DriveTrain extends SubsystemBase {
 
     private WPI_TalonSRX m_leftLeader, m_leftFollower, m_rightLeader, m_rightFollower;
-
     private AHRS m_gyro;
-
     private DifferentialDrive m_diffDrive;
 
     // Creates a variable for Open Loop Ramp value a.k.a. Slew Rate.
@@ -172,8 +169,10 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose) {
+
         resetEncoders();
         m_odometry.resetPosition(pose, m_gyro.getRotation2d());
+
     }
 
     public void setMaxOutput(double maxOutput) {
@@ -186,8 +185,10 @@ public class DriveTrain extends SubsystemBase {
 
     // Encoder methods
     public void resetEncoders() {
+
         m_leftLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
         m_rightLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
+
     }
 
     public double getLeftEncoderPosition() {
@@ -215,15 +216,19 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public double[] getLeftValues() {
+
         m_leftValues[0] = getLeftEncoderPosition() / (kEncoderTicksPerMeter * 0.0254);
         m_leftValues[1] = getLeftSetPoint() / (kEncoderTicksPerMeter * 0.0254);
         return m_leftValues;
+
     }
 
     public double[] getRightValues() {
+
         m_rightValues[0] = getRightEncoderPosition() / (kEncoderTicksPerMeter * 0.0254);
         m_rightValues[1] = getRightSetPoint() / (kEncoderTicksPerMeter * 0.0254);
         return m_rightValues;
+
     }
 
     // Gyro methods
@@ -253,15 +258,18 @@ public class DriveTrain extends SubsystemBase {
 
     // Drive Train Methods
     private double deadband(double value) {
+
         if (Math.abs(value) >= kDriverDeadband) {
             return value;
         } else {
             return 0;
         }
+
     }
 
 	@SuppressWarnings("unused")
     private double clamp(double value) {
+
         if (value >= m_driveAbsMax){
             return m_driveAbsMax;
         } 
@@ -271,21 +279,26 @@ public class DriveTrain extends SubsystemBase {
         }
 
         return value;
+
     }
 
     public void invertDrive() {
+
         m_isDriveInverted = !m_isDriveInverted;
         m_invSpeed = m_invSpeed * -1;
+
     }
 
     public void teleopDrive(double speedValue, double rotationValue) {
-        m_diffDrive.arcadeDrive(deadband(m_invSpeed * speedValue), deadband(rotationValue));
+        m_diffDrive.arcadeDrive(-deadband(m_invSpeed * speedValue), deadband(rotationValue));
     }
 
     public void tankDriveVolts(double leftVolts, double rightVolts) {
+
         m_leftLeader.setVoltage(leftVolts);
         m_rightLeader.setVoltage(rightVolts);
         feedWatchdog();
+
     }
 
     public void motionMagicStartConfigDrive(double lengthInTicks) {
@@ -302,6 +315,7 @@ public class DriveTrain extends SubsystemBase {
 
         m_leftSetpoint = lengthInTicks;
         m_rightSetpoint = lengthInTicks;
+    
     }
 
     public boolean motionMagicDrive(double targetPosition) {
@@ -315,6 +329,7 @@ public class DriveTrain extends SubsystemBase {
         m_diffDrive.feedWatchdog();
 
         return Math.abs(m_currentLetfPos - targetPosition) < kAllowableCloseLoopError && Math.abs(m_currentRightPos - targetPosition) < kAllowableCloseLoopError;
+    
     }
 
     public void motionMagicStartConfigsTurn(boolean isCCWturn, double lengthInTicks){   
@@ -331,7 +346,6 @@ public class DriveTrain extends SubsystemBase {
 
         m_leftSetpoint = lengthInTicks;
         m_rightSetpoint = -lengthInTicks;
-        
 
 	}
 
@@ -348,6 +362,7 @@ public class DriveTrain extends SubsystemBase {
         m_diffDrive.feedWatchdog();
 
         return (m_targetTicks - m_currentL) < kAllowableCloseLoopError && (m_targetTicks - m_currentR) < kAllowableCloseLoopError;
+    
     }
 
     public double getLeftSetPoint() {
@@ -377,6 +392,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public void updateDriveLimiters() {
+
         m_driveAbsMax = m_driveAbsMaxEntry.getDouble(0);
         m_secondsFromNeutral = m_secondsFromNeutralEntry.getDouble(0);
 
@@ -384,6 +400,7 @@ public class DriveTrain extends SubsystemBase {
         m_leftFollower.configOpenloopRamp(m_secondsFromNeutral);
         m_rightLeader.configOpenloopRamp(m_secondsFromNeutral);
         m_rightFollower.configOpenloopRamp(m_secondsFromNeutral);
+    
     }
 
     public double getOpenLoopRamp() {
@@ -399,6 +416,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public double getPIDValue(String slot, String value) {
+
         if (slot == "Drive") {
             if (value == "kP") {
                 return kDriveGains.kP;

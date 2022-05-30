@@ -5,7 +5,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.*;
@@ -29,7 +28,6 @@ public class Shooter extends SubsystemBase{
         m_sparkShooter.restoreFactoryDefaults();
 
         m_shooterPID = m_sparkShooter.getPIDController();
-        m_shooterEncoder = m_sparkShooter.getEncoder();
 
         m_shooterPID.setP(kShooterGains.kP);
         m_shooterPID.setI(kShooterGains.kI);
@@ -37,8 +35,10 @@ public class Shooter extends SubsystemBase{
         m_shooterPID.setFF(kShooterGains.kF);
         m_shooterPID.setIZone(kShooterGains.kIzone);
         m_shooterPID.setOutputRange(0, kShooterGains.kPeakOutput);
+        
+        m_shooterEncoder = m_sparkShooter.getEncoder();
 
-        m_nearSpeed = 2000; // rpm
+        m_nearSpeed = 4000; // rpm
         m_farSpeed = 2000; // rpm
 
         m_isFarTarget = false;
@@ -52,8 +52,11 @@ public class Shooter extends SubsystemBase{
     }
 
     public void nearShot() {
-        m_shooterPID.setReference(m_nearSpeed, ControlType.kVelocity);
+
+        //m_shooterPID.setReference(m_nearSpeed, ControlType.kVelocity);
+        m_sparkShooter.set(0.8);
         m_isFarTarget = false;
+
     }
 
     public void farShot() {
@@ -62,9 +65,7 @@ public class Shooter extends SubsystemBase{
     }
 
     public void stop() {
-
-        m_shooterPID.setReference(0, ControlType.kSmartVelocity);
-
+        m_sparkShooter.set(0);
     }
 
     public double getRPM() {
