@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.*;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -12,47 +10,53 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
-
-import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class DriveTrain extends SubsystemBase{
+import static frc.robot.Constants.*;
+
+public class DriveTrain extends SubsystemBase {
 
     private WPI_TalonSRX m_leftLeader, m_leftFollower, m_rightLeader, m_rightFollower;
-
     private AHRS m_gyro;
-
     private DifferentialDrive m_diffDrive;
 
     // Creates a variable for Open Loop Ramp value a.k.a. Slew Rate.
-    // This is for tuning purposes. After tuned, update the kSecondsFromNeutral variable on Constants.java
+    // This is for tuning purposes. After tuned, update the kSecondsFromNeutral
+    // variable on Constants.java
     private double m_secondsFromNeutral, m_driveAbsMax;
     NetworkTableEntry m_secondsFromNeutralEntry, m_driveAbsMaxEntry;
 
-    //Motion Magic set points
+    // Motion Magic set points
     private double m_leftSetpoint, m_rightSetpoint;
 
     // Invert Drive
     private int m_invSpeed;
     private boolean m_isDriveInverted;
 
+    // Odometry class for tracking robot pose
+    private DifferentialDriveOdometry m_odometry;
+
+    private double m_leftValues[];
+    private double m_rightValues[];
+
     public DriveTrain() {
 
         m_rightLeader = new WPI_TalonSRX(kRIGHT_LEADER);
         m_rightFollower = new WPI_TalonSRX(kRIGHT_FOLLOWER);
-        m_leftLeader  = new WPI_TalonSRX(kLEFT_LEADER);
+        m_leftLeader = new WPI_TalonSRX(kLEFT_LEADER);
         m_leftFollower = new WPI_TalonSRX(kLEFT_FOLLOWER);
         TalonSRXConfiguration config = new TalonSRXConfiguration();
 
         // Factory default the talons
         m_leftLeader.configAllSettings(config);
         m_rightLeader.configAllSettings(config);
-        //m_rightFollower.configAllSettings(config); ???
 
         // Set all the configuration values that are common across
         // both sides of the drivetrain
@@ -79,59 +83,56 @@ public class DriveTrain extends SubsystemBase{
         config.slot1.kP = kTurnGains.kP;
         config.slot1.kI = kTurnGains.kI;
         config.slot1.kD = kTurnGains.kD;
-        config.slot1.allowableClosedloopError = 10;
         config.slot1.integralZone = kTurnGains.kIzone;
         config.slot1.closedLoopPeakOutput = kTurnGains.kPeakOutput;
+        config.slot1.allowableClosedloopError = 10;
         config.slot1.closedLoopPeriod = 1; // 1 ms
 
         m_leftLeader.configAllSettings(config);
         m_rightLeader.configAllSettings(config);
 
         // Set the followers and inverts
-        m_leftLeader.setInverted(true);
+        m_leftLeader.setInverted(false);
         m_leftLeader.setSensorPhase(true);
-        m_rightLeader.setInverted(false);
-        m_rightLeader.setSensorPhase(false);
+        m_rightLeader.setInverted(true);
+        m_rightLeader.setSensorPhase(true);
         m_rightFollower.follow(m_rightLeader);
         m_rightFollower.setInverted(InvertType.FollowMaster);
         m_leftFollower.follow(m_leftLeader);
         m_leftFollower.setInverted(InvertType.FollowMaster);
-  
+
         // Neutral Mode to Help slow things down
         m_rightLeader.setNeutralMode(NeutralMode.Brake);
         m_leftLeader.setNeutralMode(NeutralMode.Brake);
 
         // Setup quadrature as primary encoder for PID driving
-        m_rightLeader.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, kPID_PRIMARY, 0);
         m_leftLeader.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, kPID_PRIMARY, 0);
-        m_rightLeader.setSelectedSensorPosition(0, kSlotDrive, 0);
+        m_rightLeader.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, kPID_PRIMARY, 0);
         m_leftLeader.setSelectedSensorPosition(0, kSlotDrive, 0);
-    
+        m_rightLeader.setSelectedSensorPosition(0, kSlotDrive, 0);
+
         // select profile slot
         m_leftLeader.selectProfileSlot(kSlotDrive, kPID_PRIMARY);
         m_rightLeader.selectProfileSlot(kSlotDrive, kPID_PRIMARY);
-    
-        // We have observed a couple times where the robot loses control and continues without operator
-        // input, changed the TalonSRX objects to be WPI_Talons so we can use the differential drive.
-        // We aren't going to actually drive with it.  We are just going to use it for the Watchdog timer.
+
         m_diffDrive = new DifferentialDrive(m_leftLeader, m_rightLeader);
 
         /* Set status frame periods */
-		m_rightLeader.setStatusFramePeriod(StatusFrame.Status_12_Feedback1, 20, kTimeoutMs);
-		m_rightLeader.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1, 20, kTimeoutMs);
-		m_leftLeader.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, kTimeoutMs);		//Used remotely by right Talon, speed up
+        m_rightLeader.setStatusFramePeriod(StatusFrame.Status_12_Feedback1, 20, kTimeoutMs);
+        m_rightLeader.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1, 20, kTimeoutMs);
+        m_leftLeader.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 5, kTimeoutMs); // Used remotely by right
+                                                                                          // Talon, speed up
 
         m_leftLeader.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, kTimeoutMs);
         m_leftLeader.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, kTimeoutMs);
         m_rightLeader.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 10, kTimeoutMs);
         m_rightLeader.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, kTimeoutMs);
 
-    
         m_leftLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 35, 40, 1.0), 0);
         m_rightLeader.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 35, 40, 1.0), 0);
 
-        //Creates a gyro
-        try{
+        // Creates a gyro
+        try {
             m_gyro = new AHRS(SerialPort.Port.kUSB1);
             m_gyro.enableLogging(true);
         } catch (RuntimeException ex) {
@@ -141,23 +142,54 @@ public class DriveTrain extends SubsystemBase{
         // Invert Drive Variables
         m_invSpeed = 1;
         m_isDriveInverted = false;
-      
-        // Tuning Params //
 
-        NetworkTable m_driveTestTable = NetworkTableInstance.getDefault().getTable("Shuffleboard").getSubTable("Drive Testing");
+        resetEncoders();
+        m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
 
-        m_driveAbsMaxEntry = m_driveTestTable.getEntry("Drive Max");
-        m_secondsFromNeutralEntry = m_driveTestTable.getEntry("Forward Limiter");
-        m_gyro.reset();
+        m_leftValues = new double[2];
+        m_rightValues = new double[2];
 
-        // End of Tuning Params //
+    }
 
+    @Override
+    public void periodic() {
+        updateOdometry();
+    }
+
+    // Odometry and PathWeaver methods
+    public void updateOdometry() {
+        m_odometry.update(m_gyro.getRotation2d(), getLeftEncoderPosition(), getRightEncoderPosition());
+    }
+
+    public Pose2d getPose() {
+        return m_odometry.getPoseMeters();
+    }
+
+    public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+        return new DifferentialDriveWheelSpeeds(getLeftEncoderVelocity(), getRightEncoderVelocity());
+    }
+
+    public void resetOdometry(Pose2d pose) {
+
+        resetEncoders();
+        m_odometry.resetPosition(pose, m_gyro.getRotation2d());
+
+    }
+
+    public void setMaxOutput(double maxOutput) {
+        m_diffDrive.setMaxOutput(maxOutput);
+    }
+
+    public DifferentialDrive getDiffDrive() {
+        return m_diffDrive;
     }
 
     // Encoder methods
     public void resetEncoders() {
-        m_leftLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
-        m_rightLeader.setSelectedSensorPosition(0,kPID_PRIMARY,0);
+
+        m_leftLeader.setSelectedSensorPosition(0, kPID_PRIMARY, 0);
+        m_rightLeader.setSelectedSensorPosition(0, kPID_PRIMARY, 0);
+
     }
 
     public double getLeftEncoderPosition() {
@@ -165,7 +197,7 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public double getRightEncoderPosition() {
-        return m_leftLeader.getSelectedSensorPosition();
+        return m_rightLeader.getSelectedSensorPosition();
     }
 
     public double getLeftEncoderVelocity() {
@@ -184,9 +216,25 @@ public class DriveTrain extends SubsystemBase{
         return (getRightSetPoint() - getRightEncoderPosition());
     }
 
+    public double[] getLeftValues() {
+
+        m_leftValues[0] = getLeftEncoderPosition() / (kEncoderTicksPerMeter * 0.0254);
+        m_leftValues[1] = getLeftSetPoint() / (kEncoderTicksPerMeter * 0.0254);
+        return m_leftValues;
+
+    }
+
+    public double[] getRightValues() {
+
+        m_rightValues[0] = getRightEncoderPosition() / (kEncoderTicksPerMeter * 0.0254);
+        m_rightValues[1] = getRightSetPoint() / (kEncoderTicksPerMeter * 0.0254);
+        return m_rightValues;
+
+    }
+
     // Gyro methods
     public double getHeading() {
-        return Math.IEEEremainder(m_gyro.getAngle(), 360);
+        return m_gyro.getRotation2d().getDegrees();
     }
 
     public double getRawAngle() {
@@ -197,48 +245,65 @@ public class DriveTrain extends SubsystemBase{
         return m_gyro;
     }
 
+    public void resetGyro() {
+        m_gyro.reset();
+    }
+
+    public double getAverageEncoderDistance() {
+        return (getLeftEncoderPosition() + getRightEncoderPosition()) / 2.0;
+    }
+
+    public double getTurnRate() {
+        return -m_gyro.getRate();
+    }
+
     // Drive Train Methods
     private double deadband(double value) {
+
         if (Math.abs(value) >= kDriverDeadband) {
             return value;
         } else {
             return 0;
         }
+
     }
 
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private double clamp(double value) {
-        if (value >= m_driveAbsMax){
+
+        if (value >= m_driveAbsMax) {
             return m_driveAbsMax;
-        } 
-        
+        }
+
         if (value <= -m_driveAbsMax) {
             return -m_driveAbsMax;
         }
 
         return value;
+
     }
 
     public void invertDrive() {
 
-        if (m_isDriveInverted == false) {
-            m_isDriveInverted = true;
-        } else {
-            m_isDriveInverted = false;
-        }
+        m_isDriveInverted = !m_isDriveInverted;
         m_invSpeed = m_invSpeed * -1;
 
     }
 
-    public void teleopDrive(double speedValue, double rotationValue, boolean isSquared) {
-        m_diffDrive.arcadeDrive(deadband(m_invSpeed * speedValue), deadband(-rotationValue), isSquared);
+    public void teleopDrive(double speedValue, double rotationValue) {
+        m_diffDrive.arcadeDrive(-deadband(m_invSpeed * speedValue), deadband(rotationValue));
     }
 
-    public void teleopDrive(double speedValue, double rotationValue) {
-        m_diffDrive.arcadeDrive(deadband(m_invSpeed * speedValue), deadband(-rotationValue));
+    public void tankDriveVolts(double leftVolts, double rightVolts) {
+
+        m_leftLeader.setVoltage(leftVolts);
+        m_rightLeader.setVoltage(rightVolts);
+        feedWatchdog();
+
     }
 
     public void motionMagicStartConfigDrive(double lengthInTicks) {
+
         resetEncoders();
 
         m_leftLeader.configMotionCruiseVelocity(kMotionCruiseVelocity, kTimeoutMs);
@@ -251,6 +316,7 @@ public class DriveTrain extends SubsystemBase{
 
         m_leftSetpoint = lengthInTicks;
         m_rightSetpoint = lengthInTicks;
+
     }
 
     public boolean motionMagicDrive(double targetPosition) {
@@ -263,45 +329,44 @@ public class DriveTrain extends SubsystemBase{
 
         m_diffDrive.feedWatchdog();
 
-        return Math.abs(m_currentLetfPos - targetPosition) < kAllowableCloseLoopError && Math.abs(m_currentRightPos - targetPosition) < kAllowableCloseLoopError;
+        return Math.abs(m_currentLetfPos - targetPosition) < kAllowableCloseLoopError
+                && Math.abs(m_currentRightPos - targetPosition) < kAllowableCloseLoopError;
+
     }
 
-    public void motionMagicStartConfigsTurn(boolean isCCWturn, double lengthInTicks){   
+    public void motionMagicStartConfigsTurn(boolean isCCWturn, double lengthInTicks) {
 
         resetEncoders();
-		m_leftLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
-		m_rightLeader.selectProfileSlot(kSlotTurning, kPID_TURN);
-		m_leftLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
-		m_leftLeader.configMotionAcceleration(1000, kTimeoutMs);
-		m_rightLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
-		m_rightLeader.configMotionAcceleration(1000, kTimeoutMs);
+
+        m_leftLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
+        m_leftLeader.configMotionAcceleration(1000, kTimeoutMs);
+        m_rightLeader.configMotionCruiseVelocity(1200, kTimeoutMs);
+        m_rightLeader.configMotionAcceleration(1000, kTimeoutMs);
+
+        m_leftLeader.selectProfileSlot(kSlotTurning, kPID_PRIMARY);
+        m_rightLeader.selectProfileSlot(kSlotTurning, kPID_PRIMARY);
 
         m_leftSetpoint = lengthInTicks;
         m_rightSetpoint = -lengthInTicks;
 
-	}
+    }
 
     public boolean motionMagicTurn(double arc_in_ticks) {
-    
+
         m_leftLeader.set(ControlMode.MotionMagic, arc_in_ticks);
-		m_rightLeader.set(ControlMode.MotionMagic, -arc_in_ticks);
+        m_rightLeader.set(ControlMode.MotionMagic, -arc_in_ticks);
 
-        double currentL = getLeftEncoderPosition();
-        double currentR = getRightEncoderPosition();
+        double m_currentL = getLeftEncoderPosition();
+        double m_currentR = getRightEncoderPosition();
 
-        int targetTicks = Math.abs((int)arc_in_ticks);
+        int m_targetTicks = Math.abs((int) arc_in_ticks);
 
         m_diffDrive.feedWatchdog();
 
-        return (targetTicks - currentL) < kAllowableCloseLoopError && (targetTicks - currentR) < kAllowableCloseLoopError;
-    }
+        return (m_targetTicks - m_currentL) < kAllowableCloseLoopError
+                && (m_targetTicks - m_currentR) < kAllowableCloseLoopError;
 
-    public void motionMagicEndConfigTurn(){
-		//m_leftLeader.configMotionCruiseVelocity(16636, kTimeoutMs);
-		//m_leftLeader.configMotionAcceleration(8318, kTimeoutMs);
-		//m_rightLeader.configMotionCruiseVelocity(16636, kTimeoutMs);
-		//m_rightLeader.configMotionAcceleration(8318, kTimeoutMs);
-	}
+    }
 
     public double getLeftSetPoint() {
         return m_leftSetpoint;
@@ -330,6 +395,7 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public void updateDriveLimiters() {
+
         m_driveAbsMax = m_driveAbsMaxEntry.getDouble(0);
         m_secondsFromNeutral = m_secondsFromNeutralEntry.getDouble(0);
 
@@ -337,6 +403,15 @@ public class DriveTrain extends SubsystemBase{
         m_leftFollower.configOpenloopRamp(m_secondsFromNeutral);
         m_rightLeader.configOpenloopRamp(m_secondsFromNeutral);
         m_rightFollower.configOpenloopRamp(m_secondsFromNeutral);
+
+    }
+
+    public double getOpenLoopRamp() {
+        return m_secondsFromNeutral;
+    }
+
+    public double getMaxVel() {
+        return m_driveAbsMax;
     }
 
     public void feedWatchdog() {
@@ -344,26 +419,27 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public double getPIDValue(String slot, String value) {
+
         if (slot == "Drive") {
-            if (value == "Kp") {
+            if (value == "kP") {
                 return kDriveGains.kP;
-            } else if (value == "Ki") {
+            } else if (value == "kI") {
                 return kDriveGains.kI;
-            } else if (value == "Kd") {
+            } else if (value == "kD") {
                 return kDriveGains.kD;
-            } else if (value == "Kf") {
+            } else if (value == "kF") {
                 return kDriveGains.kF;
             } else {
                 return 0.0;
             }
-        } else if (slot == "Turn"){
-            if (value == "Kp") {
+        } else if (slot == "Turn") {
+            if (value == "kP") {
                 return kTurnGains.kP;
-            } else if (value == "Ki") {
+            } else if (value == "kI") {
                 return kTurnGains.kI;
-            } else if (value == "Kd") {
+            } else if (value == "kD") {
                 return kTurnGains.kD;
-            } else if (value == "Kf") {
+            } else if (value == "kF") {
                 return kTurnGains.kF;
             } else {
                 return 0.0;
@@ -373,5 +449,5 @@ public class DriveTrain extends SubsystemBase{
         }
 
     }
-    
+
 }

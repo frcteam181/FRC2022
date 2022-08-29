@@ -46,7 +46,6 @@ public class TurnToAngle extends CommandBase {
     public void end(boolean interrupted) {
         
         m_driveTrain.teleopDrive(0, 0);
-        m_driveTrain.motionMagicEndConfigTurn();
 
     }
 

@@ -20,7 +20,7 @@ public class DriveMM extends CommandBase {
         // WheelRotations = positionMeters/(2 * Math.PI * kWheelRadiusInches);
 	   	// motorRotations = wheelRotations * kSensorGearRatio
 		// sensorCounts =   motorRotations * kCountsPerRev
-        m_targetPosition = targetInches * kEncoderTicksPerInch;
+        m_targetPosition = (targetInches * 0.0254) * kEncoderTicksPerMeter;
 
         addRequirements(m_driveTrain);
 
@@ -29,7 +29,7 @@ public class DriveMM extends CommandBase {
     @Override
     public void initialize() {
 
-        m_driveTrain.motionMagicStartConfigDrive( m_targetPosition);
+        m_driveTrain.motionMagicStartConfigDrive(m_targetPosition);
 
     }
 

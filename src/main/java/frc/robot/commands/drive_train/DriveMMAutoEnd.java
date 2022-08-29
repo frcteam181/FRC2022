@@ -20,7 +20,7 @@ public class DriveMMAutoEnd extends CommandBase {
         // WheelRotations = positionMeters/(2 * Math.PI * kWheelRadiusInches);
 	   	// motorRotations = wheelRotations * kSensorGearRatio
 		// sensorCounts =   motorRotations * kCountsPerRev
-        m_targetPosition = targetInches * kEncoderTicksPerInch;
+        m_targetPosition = (targetInches * 0.0254) * kEncoderTicksPerMeter;
 
         addRequirements(m_driveTrain);
 
